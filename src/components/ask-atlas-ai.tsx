@@ -98,7 +98,7 @@ export function AskAtlasAI() {
     <Card className="flex h-[calc(100vh-10rem)] flex-col md:h-full">
       <CardHeader>
         <div className="flex items-center gap-3">
-            <Bot className="h-6 w-6 text-primary" />
+            <Sparkles className="h-6 w-6 text-primary" />
             <h1 className="font-headline text-xl font-semibold">Ask Voyage AI</h1>
         </div>
       </CardHeader>

@@ -28,6 +28,7 @@ import {
   Plane,
   Settings,
   Siren,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -39,7 +40,7 @@ const navItems = [
   { href: '/inbox', icon: Inbox, label: 'Inbox' },
   { href: '/connections', icon: Cable, label: 'Connections' },
   { href: '/alerts', icon: Siren, label: 'Alerts' },
-  { href: '/ai', icon: Bot, label: 'Ask Voyage AI' },
+  { href: '/ai', icon: Sparkles, label: 'Ask Voyage AI' },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -56,7 +57,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Bot className="h-5 w-5" />
+              <Sparkles className="h-5 w-5" />
             </Button>
             <span className="font-headline text-lg font-semibold">
               Voyage AI
@@ -115,7 +116,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 md:hidden">
           <Link href="/itinerary" className="flex items-center gap-2">
-            <Bot className="h-6 w-6" />
+            <Sparkles className="h-6 w-6" />
             <span className="font-headline text-lg font-semibold">
               Voyage AI
             </span>
@@ -125,7 +126,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <main className="flex-1 p-4 sm:p-6">{children}</main>
         <nav className="fixed bottom-0 z-10 w-full border-t bg-background/80 backdrop-blur-sm md:hidden">
           <div className="mx-auto grid h-16 max-w-md grid-cols-5 items-center justify-center gap-1 px-2">
-            {navItems.map((item) => (
+            {navItems.slice(0, 5).map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
