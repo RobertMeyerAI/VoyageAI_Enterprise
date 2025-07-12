@@ -13,28 +13,9 @@ import {
 } from '@/components/ui/card';
 import type { AiChatMessage } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Send, Sparkles, Wind } from 'lucide-react';
+import { Send, Sparkles, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-
-const GlobeIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-      <path d="M2 12h20" />
-    </svg>
-  );
 
 const quickActions = [
   'How do I get from CPH to my hotel?',
@@ -117,15 +98,15 @@ export function AskAtlasAI() {
     <Card className="flex h-[calc(100vh-10rem)] flex-col md:h-full">
       <CardHeader>
         <div className="flex items-center gap-3">
-            <GlobeIcon className="h-6 w-6 text-primary" />
-            <h1 className="font-headline text-xl font-semibold">Ask Atlas</h1>
+            <Bot className="h-6 w-6 text-primary" />
+            <h1 className="font-headline text-xl font-semibold">Ask Voyage AI</h1>
         </div>
       </CardHeader>
       <CardContent ref={scrollAreaRef} className="flex-1 space-y-6 overflow-y-auto p-4">
         {messages.length === 0 && (
           <div className="text-center text-muted-foreground">
             <Sparkles className="mx-auto h-10 w-10 mb-4" />
-            <p className="font-medium">Welcome to Atlas AI</p>
+            <p className="font-medium">Welcome to Voyage AI</p>
             <p className="text-sm">Your context-aware travel assistant. Ask me anything about your trip.</p>
             <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
               {quickActions.map((action) => (
@@ -146,8 +127,8 @@ export function AskAtlasAI() {
           >
             {message.role === 'assistant' && (
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder.svg" alt="Atlas" asChild>
-                    <GlobeIcon className='p-1.5' />
+                <AvatarImage src="/placeholder.svg" alt="Voyage AI" asChild>
+                    <Bot className='p-1.5' />
                 </AvatarImage>
                 <AvatarFallback>AI</AvatarFallback>
               </Avatar>
@@ -178,8 +159,8 @@ export function AskAtlasAI() {
         {isLoading && (
             <div className="flex items-start gap-3">
                 <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg" alt="Atlas" asChild>
-                        <GlobeIcon className='p-1.5' />
+                    <AvatarImage src="/placeholder.svg" alt="Voyage AI" asChild>
+                        <Bot className='p-1.5' />
                     </AvatarImage>
                     <AvatarFallback>AI</AvatarFallback>
                 </Avatar>

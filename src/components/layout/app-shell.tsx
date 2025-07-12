@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
+  Bot,
   Cable,
   Inbox,
   LogOut,
@@ -33,32 +34,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
-const GlobeIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    <path d="M2 12h20" />
-  </svg>
-);
-
 const navItems = [
   { href: '/itinerary', icon: Plane, label: 'Itinerary' },
   { href: '/map', icon: Map, label: 'Map' },
   { href: '/inbox', icon: Inbox, label: 'Inbox' },
   { href: '/connections', icon: Cable, label: 'Connections' },
   { href: '/alerts', icon: Siren, label: 'Alerts' },
-  { href: '/ai', icon: Sparkles, label: 'Ask Atlas' },
+  { href: '/ai', icon: Sparkles, label: 'Ask Voyage AI' },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -75,10 +57,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="h-8 w-8">
-              <GlobeIcon className="h-5 w-5" />
+              <Bot className="h-5 w-5" />
             </Button>
             <span className="font-headline text-lg font-semibold">
-              Atlas Nomad
+              Voyage AI
             </span>
           </div>
         </SidebarHeader>
@@ -124,7 +106,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div className="flex flex-col">
                 <span className="text-sm font-medium">Seasoned Traveler</span>
                 <span className="text-xs text-muted-foreground">
-                  pro@atlas.com
+                  pro@voyage.ai
                 </span>
               </div>
             </div>
@@ -134,9 +116,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 md:hidden">
           <Link href="/itinerary" className="flex items-center gap-2">
-            <GlobeIcon className="h-6 w-6" />
+            <Bot className="h-6 w-6" />
             <span className="font-headline text-lg font-semibold">
-              Atlas Nomad
+              Voyage AI
             </span>
           </Link>
           <SidebarTrigger />
