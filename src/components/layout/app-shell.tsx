@@ -77,15 +77,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             {navItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <Link href={item.href} legacyBehavior passHref>
-                  <SidebarMenuButton
-                    isActive={pathname.startsWith(item.href)}
-                    tooltip={item.label}
-                  >
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith(item.href)}
+                  tooltip={item.label}
+                >
+                  <Link href={item.href}>
                     <item.icon />
                     <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
@@ -135,19 +136,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <nav className="fixed bottom-0 z-10 w-full border-t bg-background/80 backdrop-blur-sm md:hidden">
           <div className="mx-auto grid h-16 max-w-md grid-cols-5 items-center justify-center gap-1 px-2">
             {navItems.map((item) => (
-              <Link key={item.href} href={item.href} className="flex-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`flex h-14 w-full flex-col items-center justify-center gap-1 rounded-none text-xs ${
-                    pathname.startsWith(item.href)
-                      ? 'text-primary'
-                      : 'text-muted-foreground'
-                  }`}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.label}</span>
-                </Button>
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex h-14 flex-1 flex-col items-center justify-center gap-1 rounded-none text-xs ${
+                  pathname.startsWith(item.href)
+                    ? 'text-primary'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                <item.icon className="h-5 w-5" />
+                <span>{item.label}</span>
               </Link>
             ))}
           </div>
