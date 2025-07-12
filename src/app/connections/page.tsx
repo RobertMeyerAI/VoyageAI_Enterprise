@@ -77,27 +77,26 @@ export default function ConnectionsPage() {
                 <span className='hidden sm:inline'>{connection.to}</span>
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4">
               {connection.options.map((option) => (
                 <Card
                   key={option.type}
-                  className="relative flex flex-col transition-all hover:scale-[1.02] hover:shadow-lg"
+                  className="relative transition-all hover:shadow-lg hover:shadow-primary/10"
                 >
                   {option.isBest && <Badge className='absolute top-2 right-2 text-xs py-0.5 px-1.5'><span className='mr-1'>{bestIcons[option.isBest]}</span>{option.isBest}</Badge>}
-                  <CardHeader className="flex-row items-center gap-3 space-y-0 pb-2">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <div className="flex items-center p-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary mr-3">
                       {optionIcons[option.type]}
                     </div>
-                    <CardTitle className="text-lg">{option.type}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex-1">
-                    <p className="text-sm font-medium">
-                      {option.duration} &middot; {option.cost}
-                    </p>
-                    <CardDescription className="text-xs mt-1">
-                      {option.description}
-                    </CardDescription>
-                  </CardContent>
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm">{option.type}</p>
+                      <p className="text-xs text-muted-foreground">{option.description}</p>
+                    </div>
+                     <div className="text-right ml-2">
+                        <p className="text-sm font-medium whitespace-nowrap">{option.duration}</p>
+                        <p className="text-xs font-medium text-muted-foreground whitespace-nowrap">{option.cost}</p>
+                    </div>
+                  </div>
                 </Card>
               ))}
             </div>
