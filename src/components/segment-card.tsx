@@ -1,4 +1,5 @@
 import type { Segment } from '@/lib/types';
+import Image from 'next/image';
 import {
   Activity,
   ArrowRight,
@@ -10,6 +11,8 @@ import {
   MoreVertical,
   Plane,
   Train,
+  QrCode,
+  FileText,
 } from 'lucide-react';
 import {
   Card,
@@ -42,6 +45,11 @@ const segmentIcons: Record<Segment['type'], React.ReactNode> = {
   car: <Car className="h-5 w-5" />,
 };
 
+const mediaIcons: Record<NonNullable<Segment['media']>[number]['type'], React.ReactNode> = {
+  qr: <QrCode className="h-4 w-4 mr-2" />,
+  pdf: <FileText className="h-4 w-4 mr-2" />,
+};
+
 const segmentColors: Record<Segment['type'], string> = {
   flight: 'text-blue-400',
   lodging: 'text-purple-400',
@@ -68,7 +76,7 @@ export function SegmentCard({ segment }: { segment: Segment }) {
       onOpenChange={setIsOpen}
     >
       <Card className="overflow-hidden transition-all hover:shadow-lg hover:shadow-primary/10">
-            <CardHeader className="flex flex-row items-center gap-3 space-y-0 p-2 text-left">
+            <div className="flex items-center gap-3 p-2 text-left">
               <CollapsibleTrigger className="flex flex-1 items-center gap-3 text-left">
                 <div
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary ${
@@ -104,11 +112,13 @@ export function SegmentCard({ segment }: { segment: Segment }) {
                     <DropdownMenuItem>Share Segment</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <CollapsibleTrigger>
-                  <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                    </Button>
                 </CollapsibleTrigger>
             </div>
-            </CardHeader>
+            </div>
         <CollapsibleContent>
             <div className="border-t border-dashed p-4 text-sm space-y-4">
             <div className="flex items-center justify-between">
@@ -155,6 +165,39 @@ export function SegmentCard({ segment }: { segment: Segment }) {
                   </div>
                   ))}
               </div>
+              {segment.media && segment.media.length > 0 && (
+                <div className="border-t pt-4">
+                  <h4 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
+                    Boarding Pass / Tickets
+                  </h4>
+                  <div className="flex flex-wrap gap-4">
+                    {segment.media.map((item, index) => (
+                      <a
+                        key={index}
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-col items-center gap-2 rounded-lg border p-2 hover:bg-secondary"
+                      >
+                        {item.type === 'qr' && (
+                          <Image
+                            src={item.url}
+                            alt="QR Code"
+                            width={100}
+                            height={100}
+                            className="rounded-md"
+                            data-ai-hint="qr code"
+                          />
+                        )}
+                        <span className="flex items-center text-xs font-medium text-primary">
+                          {mediaIcons[item.type]}
+                          {item.type === 'qr' ? 'Scan QR Code' : 'View PDF'}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
         </CollapsibleContent>
       </Card>

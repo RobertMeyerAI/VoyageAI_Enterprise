@@ -30,6 +30,12 @@ export const trips: Trip[] = [
             endLocationShort: 'CPH',
             duration: '2h 20m',
             details: { Gate: '42B', Seat: '18A', Terminal: '2D' },
+            media: [
+              {
+                type: 'qr',
+                url: 'https://placehold.co/150x150.png',
+              },
+            ],
           },
           {
             id: 'seg2',
