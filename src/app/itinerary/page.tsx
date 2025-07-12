@@ -37,11 +37,11 @@ export default function ItineraryListPage() {
           Your upcoming adventures, all in one place.
         </p>
       </header>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="flex flex-col gap-4">
         {trips.map((trip) => (
           <Link href={`/itinerary/${trip.id}`} key={trip.id} className="group">
-            <Card className="flex h-full flex-col overflow-hidden transition-all group-hover:scale-[1.02] group-hover:shadow-lg">
-              <div className="relative h-40 w-full">
+            <Card className="flex flex-col sm:flex-row overflow-hidden transition-all group-hover:bg-secondary/50">
+              <div className="relative h-40 w-full sm:h-auto sm:w-48 flex-shrink-0">
                 <Image
                   src={trip.image.url}
                   alt={trip.title}
@@ -50,14 +50,15 @@ export default function ItineraryListPage() {
                   data-ai-hint={trip.image.aiHint}
                 />
               </div>
-              <CardHeader>
-                <CardTitle>{trip.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1" />
-              <CardFooter className="text-sm text-muted-foreground">
-                <Calendar className="mr-2 h-4 w-4" />
-                {formatDateRange(trip.startDate, trip.endDate)}
-              </CardFooter>
+              <div className="flex flex-1 flex-col justify-between p-4">
+                  <div>
+                    <h2 className="text-lg font-semibold">{trip.title}</h2>
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-2">
+                    <Calendar className="mr-2 h-4 w-4 inline-block" />
+                    <span>{formatDateRange(trip.startDate, trip.endDate)}</span>
+                  </div>
+                </div>
             </Card>
           </Link>
         ))}
