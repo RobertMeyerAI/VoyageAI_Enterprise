@@ -1,78 +1,67 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { SegmentCard } from '@/components/segment-card';
-import { itineraryData as initialItineraryData, tripTitle } from '@/lib/mock-data';
-import type { DayGroup, Segment } from '@/lib/types';
-import ItineraryLoading from './loading';
-import { getLiveItineraryStatus } from '@/ai/flows/get-live-itinerary-status';
+import Link from 'next/link';
+import Image from 'next/image';
+import { trips } from '@/lib/mock-data';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Calendar } from 'lucide-react';
 
-export default function ItineraryPage() {
-  const [itinerary, setItinerary] = useState<DayGroup[] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+function formatDateRange(startDateStr: string, endDateStr: string) {
+  const startDate = new Date(startDateStr);
+  const endDate = new Date(endDateStr);
 
-  useEffect(() => {
-    const fetchLiveStatus = async () => {
-      try {
-        const allSegments = initialItineraryData.flatMap(day => day.segments);
-        const result = await getLiveItineraryStatus({ segments: allSegments });
-        
-        const updatedSegmentsById = new Map<string, Segment>();
-        result.segments.forEach(segment => {
-          updatedSegmentsById.set(segment.id, segment);
-        });
+  const startMonth = startDate.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' });
+  const startDay = startDate.getUTCDate();
+  const endMonth = endDate.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' });
+  const endDay = endDate.getUTCDate();
 
-        const updatedItinerary = initialItineraryData.map(dayGroup => ({
-          ...dayGroup,
-          segments: dayGroup.segments.map(segment => updatedSegmentsById.get(segment.id) || segment),
-        }));
-        
-        setItinerary(updatedItinerary);
-      } catch (error) {
-        console.error("Failed to fetch live itinerary status:", error);
-        // Fallback to initial data in case of an error
-        setItinerary(initialItineraryData);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchLiveStatus();
-  }, []);
-
-  if (isLoading || !itinerary) {
-    return <ItineraryLoading />;
+  if (startMonth === endMonth) {
+    return `${startMonth} ${startDay} - ${endDay}`;
+  } else {
+    return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
   }
+}
 
+export default function ItineraryListPage() {
   return (
     <div className="flex flex-col gap-8">
       <header>
         <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
-          {tripTitle}
+          My Trips
         </h1>
         <p className="text-muted-foreground">
-          Your unified timeline of all reservations.
+          Your upcoming adventures, all in one place.
         </p>
       </header>
-      {itinerary.map((dayGroup) => (
-        <div key={dayGroup.date} className="flex flex-col gap-4">
-          <div className="sticky top-14 md:top-0 z-10 -mx-6 bg-background/80 px-6 py-2 backdrop-blur-sm">
-            <h2 className="font-headline text-lg font-semibold text-foreground">
-              {dayGroup.day},{' '}
-              {new Date(dayGroup.date).toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                timeZone: 'UTC',
-              })}
-            </h2>
-          </div>
-
-          <div className="grid gap-4">
-            {dayGroup.segments.map((segment) => (
-              <SegmentCard key={segment.id} segment={segment} />
-            ))}
-          </div>
-        </div>
-      ))}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {trips.map((trip) => (
+          <Link href={`/itinerary/${trip.id}`} key={trip.id} className="group">
+            <Card className="flex h-full flex-col overflow-hidden transition-all group-hover:scale-[1.02] group-hover:shadow-lg">
+              <div className="relative h-40 w-full">
+                <Image
+                  src={trip.image.url}
+                  alt={trip.title}
+                  fill
+                  className="object-cover"
+                  data-ai-hint={trip.image.aiHint}
+                />
+              </div>
+              <CardHeader>
+                <CardTitle>{trip.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1" />
+              <CardFooter className="text-sm text-muted-foreground">
+                <Calendar className="mr-2 h-4 w-4" />
+                {formatDateRange(trip.startDate, trip.endDate)}
+              </CardFooter>
+            </Card>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

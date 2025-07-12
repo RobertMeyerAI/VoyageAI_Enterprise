@@ -22,6 +22,18 @@ export type DayGroup = {
   segments: Segment[];
 };
 
+export type Trip = {
+  id: string;
+  title: string;
+  itinerary: DayGroup[];
+  startDate: string;
+  endDate: string;
+  image: {
+    url: string;
+    aiHint: string;
+  };
+};
+
 export type InboxMessage = {
   id: string;
   summary: string;
