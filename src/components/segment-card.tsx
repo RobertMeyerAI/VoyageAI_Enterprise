@@ -68,32 +68,33 @@ export function SegmentCard({ segment }: { segment: Segment }) {
       onOpenChange={setIsOpen}
     >
       <Card className="overflow-hidden transition-all hover:shadow-lg hover:shadow-primary/10">
-        <CollapsibleTrigger className="w-full">
-            <CardHeader className="flex flex-row items-center gap-3 space-y-0 bg-secondary/30 p-2 cursor-pointer text-left">
-            <div
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary ${
-                segmentColors[segment.type]
-                }`}
-            >
-                {segmentIcons[segment.type]}
-            </div>
-            <div className="flex-1 overflow-hidden">
-                <div className="truncate text-sm font-semibold">
-                {segment.title}
-                </div>
-                <div className="truncate text-xs text-muted-foreground">
-                {segment.provider}
-                </div>
-            </div>
-            <div className="flex items-center gap-2">
-                <Badge
-                variant="outline"
-                className={`hidden text-xs capitalize sm:inline-flex ${statusColors[segment.status]}`}
+            <CardHeader className="flex flex-row items-center gap-3 space-y-0 bg-secondary/30 p-2 text-left">
+              <CollapsibleTrigger className="flex flex-1 items-center gap-3 text-left">
+                <div
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary ${
+                    segmentColors[segment.type]
+                    }`}
                 >
-                {segment.status}
+                    {segmentIcons[segment.type]}
+                </div>
+                <div className="flex-1 overflow-hidden">
+                    <div className="truncate text-sm font-semibold">
+                    {segment.title}
+                    </div>
+                    <div className="truncate text-xs text-muted-foreground">
+                    {segment.provider}
+                    </div>
+                </div>
+                <Badge
+                  variant="outline"
+                  className={`hidden text-xs capitalize sm:inline-flex ${statusColors[segment.status]}`}
+                  >
+                  {segment.status}
                 </Badge>
+              </CollapsibleTrigger>
+              <div className="flex items-center gap-2">
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
@@ -103,10 +104,11 @@ export function SegmentCard({ segment }: { segment: Segment }) {
                     <DropdownMenuItem>Share Segment</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                <CollapsibleTrigger>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                </CollapsibleTrigger>
             </div>
             </CardHeader>
-        </CollapsibleTrigger>
         <CollapsibleContent>
             <div className="border-t border-dashed p-4 text-sm space-y-4">
             <div className="flex items-center justify-between">
