@@ -59,7 +59,7 @@ const statusColors: Record<Segment['status'], string> = {
 };
 
 export function SegmentCard({ segment }: { segment: Segment }) {
-  const [isOpen, setIsOpen] = useState(segment.id === 'seg1');
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Collapsible
@@ -68,7 +68,7 @@ export function SegmentCard({ segment }: { segment: Segment }) {
       onOpenChange={setIsOpen}
     >
       <Card className="overflow-hidden transition-all hover:shadow-lg hover:shadow-primary/10">
-            <CardHeader className="flex flex-row items-center gap-3 space-y-0 bg-secondary/30 p-2 text-left">
+            <CardHeader className="flex flex-row items-center gap-3 space-y-0 p-2 text-left">
               <CollapsibleTrigger className="flex flex-1 items-center gap-3 text-left">
                 <div
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary ${
@@ -94,7 +94,7 @@ export function SegmentCard({ segment }: { segment: Segment }) {
               </CollapsibleTrigger>
               <div className="flex items-center gap-2">
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
