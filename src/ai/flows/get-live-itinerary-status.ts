@@ -1,0 +1,72 @@
+'use server';
+/**
+ * @fileOverview An AI agent that provides live status updates for an itinerary.
+ *
+ * - getLiveItineraryStatus - A function that takes itinerary segments and returns them with live-updated statuses.
+ * - GetLiveItineraryStatusInput - The input type for the getLiveItineraryStatus function.
+ * - GetLiveItineraryStatusOutput - The return type for the getLiveItineraryStatus function.
+ */
+
+import {ai} from '@/ai/genkit';
+import {z} from 'genkit';
+import type { Segment } from '@/lib/types';
+
+const SegmentSchema = z.object({
+  id: z.string(),
+  type: z.enum(['flight', 'lodging', 'train', 'ferry', 'bus', 'activity', 'car']),
+  status: z.enum(['confirmed', 'delayed', 'cancelled']),
+  title: z.string(),
+  provider: z.string(),
+  confirmationCode: z.string(),
+  startTime: z.string(),
+  endTime: z.string(),
+  startLocation: z.string(),
+  endLocation: z.string(),
+  startLocationShort: z.string(),
+  endLocationShort: z.string(),
+  duration: z.string().optional(),
+  details: z.record(z.string()).optional(),
+  media: z.array(z.object({ type: z.enum(['qr', 'pdf']), url: z.string() })).optional(),
+});
+
+const GetLiveItineraryStatusInputSchema = z.object({
+  segments: z.array(SegmentSchema).describe('An array of trip segments for the itinerary.'),
+});
+export type GetLiveItineraryStatusInput = z.infer<typeof GetLiveItineraryStatusInputSchema>;
+
+const GetLiveItineraryStatusOutputSchema = z.object({
+  segments: z.array(SegmentSchema).describe('The array of trip segments with their statuses updated based on live data.'),
+});
+export type GetLiveItineraryStatusOutput = z.infer<typeof GetLiveItineraryStatusOutputSchema>;
+
+
+export async function getLiveItineraryStatus(input: GetLiveItineraryStatusInput): Promise<GetLiveItineraryStatusOutput> {
+  return getLiveItineraryStatusFlow(input);
+}
+
+const prompt = ai.definePrompt({
+  name: 'getLiveItineraryStatusPrompt',
+  input: {schema: GetLiveItineraryStatusInputSchema},
+  output: {schema: GetLiveItineraryStatusOutputSchema},
+  prompt: `You are a live travel assistant AI named Atlas. Your task is to check the real-time status of a user's itinerary. You have access to live flight tracking, train schedules, and other travel data sources.
+
+Review the following itinerary segments. For each one, update its 'status' field to reflect the most current, real-time information. If a segment is delayed, update its 'details' to include the new estimated time and 'title' to reflect the delay. If it's on time, change the status to 'confirmed' but you can add a detail like 'On Time'. Do not change any other fields unless necessary to reflect the new status.
+
+Itinerary:
+{{{json segments}}}
+
+Return the full list of segments with the updated statuses in the same JSON format.
+`,
+});
+
+const getLiveItineraryStatusFlow = ai.defineFlow(
+  {
+    name: 'getLiveItineraryStatusFlow',
+    inputSchema: GetLiveItineraryStatusInputSchema,
+    outputSchema: GetLiveItineraryStatusOutputSchema,
+  },
+  async input => {
+    const {output} = await prompt(input);
+    return output!;
+  }
+);
