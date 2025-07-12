@@ -28,7 +28,6 @@ import {
   Plane,
   Settings,
   Siren,
-  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -40,7 +39,7 @@ const navItems = [
   { href: '/inbox', icon: Inbox, label: 'Inbox' },
   { href: '/connections', icon: Cable, label: 'Connections' },
   { href: '/alerts', icon: Siren, label: 'Alerts' },
-  { href: '/ai', icon: Sparkles, label: 'Ask Voyage AI' },
+  { href: '/ai', icon: Bot, label: 'Ask Voyage AI' },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
