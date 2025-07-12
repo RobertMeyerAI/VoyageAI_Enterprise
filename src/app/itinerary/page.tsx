@@ -1,20 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { trips } from '@/lib/mock-data';
 import type { Trip } from '@/lib/types';
 import {
   Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Sparkles } from 'lucide-react';
-import { generateTripImage } from '@/ai/flows/generate-trip-image';
+import { Calendar } from 'lucide-react';
+import * as icons from 'lucide-react';
 
 function formatDateRange(startDateStr: string, endDateStr: string) {
   const startDate = new Date(startDateStr);
@@ -33,49 +26,20 @@ function formatDateRange(startDateStr: string, endDateStr: string) {
 }
 
 function TripCard({ trip }: { trip: Trip }) {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const generateImage = async () => {
-      try {
-        const result = await generateTripImage({
-          title: trip.title,
-          destination: trip.itinerary[0]?.segments[0]?.endLocation || trip.title,
-          details: `A trip from ${trip.startDate} to ${trip.endDate}. Key activities might include exploring cities, nature, and local culture.`,
-        });
-        setImageUrl(result.imageDataUri);
-      } catch (error) {
-        console.error(`Failed to generate image for trip ${trip.id}:`, error);
-        // Fallback to the original placeholder image on error
-        setImageUrl(trip.image.url);
-      }
-    };
-
-    generateImage();
-  }, [trip]);
+  const LucideIcon = icons[trip.icon as keyof typeof icons] as React.ElementType;
 
   return (
     <Link href={`/itinerary/${trip.id}`} className="group">
-      <Card className="flex flex-col sm:flex-row overflow-hidden transition-all group-hover:bg-secondary/50">
-        <div className="relative h-40 w-full sm:h-auto sm:w-48 flex-shrink-0">
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={trip.title}
-              fill
-              className="object-cover"
-              data-ai-hint={trip.image.aiHint}
-            />
-          ) : (
-            <Skeleton className="h-full w-full" />
-          )}
+      <Card className="flex items-center p-3 overflow-hidden transition-all group-hover:bg-secondary/50">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary mr-4">
+          {LucideIcon && <LucideIcon className="h-5 w-5" />}
         </div>
-        <div className="flex flex-1 flex-col justify-between p-4">
+        <div className="flex flex-1 flex-col justify-between">
           <div>
-            <h2 className="text-lg font-semibold">{trip.title}</h2>
+            <h2 className="font-semibold">{trip.title}</h2>
           </div>
-          <div className="text-sm text-muted-foreground mt-2">
-            <Calendar className="mr-2 h-4 w-4 inline-block" />
+          <div className="text-sm text-muted-foreground mt-1">
+            <Calendar className="mr-1.5 h-4 w-4 inline-block" />
             <span>{formatDateRange(trip.startDate, trip.endDate)}</span>
           </div>
         </div>

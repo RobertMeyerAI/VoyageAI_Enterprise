@@ -6,10 +6,7 @@ export const trips: Trip[] = [
     title: 'Summer in Scandinavia',
     startDate: '2025-07-20',
     endDate: '2025-07-27',
-    image: {
-      url: 'https://placehold.co/600x400.png',
-      aiHint: 'scandinavia landscape',
-    },
+    icon: 'MountainSnow',
     itinerary: [
       {
         date: '2025-07-20',
@@ -120,10 +117,7 @@ export const trips: Trip[] = [
     title: 'Weekend in New York',
     startDate: '2025-08-15',
     endDate: '2025-08-18',
-    image: {
-      url: 'https://placehold.co/600x400.png',
-      aiHint: 'new york',
-    },
+    icon: 'Building2',
     itinerary: [
       {
         date: '2025-08-15',

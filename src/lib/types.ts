@@ -28,10 +28,7 @@ export type Trip = {
   itinerary: DayGroup[];
   startDate: string;
   endDate: string;
-  image: {
-    url: string;
-    aiHint: string;
-  };
+  icon: string;
 };
 
 export type InboxMessage = {
