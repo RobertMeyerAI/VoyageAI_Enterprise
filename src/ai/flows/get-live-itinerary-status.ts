@@ -9,9 +9,8 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import type { Segment } from '@/lib/types';
 
-const SegmentSchema = z.object({
+const SegmentSchemaForAI = z.object({
   id: z.string(),
   type: z.enum(['flight', 'lodging', 'train', 'ferry', 'bus', 'activity', 'car']),
   status: z.enum(['confirmed', 'delayed', 'cancelled']),
@@ -24,18 +23,19 @@ const SegmentSchema = z.object({
   endLocation: z.string(),
   startLocationShort: z.string(),
   endLocationShort: z.string(),
+  date: z.string().describe("The date of the segment in ISO 8601 format."),
   duration: z.string().optional(),
   details: z.record(z.string()).optional(),
   media: z.array(z.object({ type: z.enum(['qr', 'pdf']), url: z.string() })).optional(),
 });
 
 const GetLiveItineraryStatusInputSchema = z.object({
-  segments: z.array(SegmentSchema).describe('An array of trip segments for the itinerary.'),
+  segments: z.array(SegmentSchemaForAI).describe('An array of trip segments for the itinerary.'),
 });
 export type GetLiveItineraryStatusInput = z.infer<typeof GetLiveItineraryStatusInputSchema>;
 
 const GetLiveItineraryStatusOutputSchema = z.object({
-  segments: z.array(SegmentSchema).describe('The array of trip segments with their statuses updated based on live data.'),
+  segments: z.array(SegmentSchemaForAI).describe('The array of trip segments with their statuses updated based on live data.'),
 });
 export type GetLiveItineraryStatusOutput = z.infer<typeof GetLiveItineraryStatusOutputSchema>;
 
@@ -48,7 +48,7 @@ const prompt = ai.definePrompt({
   name: 'getLiveItineraryStatusPrompt',
   input: {schema: GetLiveItineraryStatusInputSchema},
   output: {schema: GetLiveItineraryStatusOutputSchema},
-  prompt: `You are a live travel assistant AI named Atlas. Your task is to check the real-time status of a user's itinerary. You have access to live flight tracking, train schedules, and other travel data sources.
+  prompt: `You are a live travel assistant AI named Voyage AI. Your task is to check the real-time status of a user's itinerary. You have access to live flight tracking, train schedules, and other travel data sources.
 
 Review the following itinerary segments. For each one, update its 'status' field to reflect the most current, real-time information. If a segment is delayed, update its 'details' to include the new estimated time and 'title' to reflect the delay. If it's on time, change the status to 'confirmed' but you can add a detail like 'On Time'. Do not change any other fields unless necessary to reflect the new status.
 
@@ -66,6 +66,10 @@ const getLiveItineraryStatusFlow = ai.defineFlow(
     outputSchema: GetLiveItineraryStatusOutputSchema,
   },
   async input => {
+    // If there are no segments, return an empty array to avoid calling the model with no data.
+    if (!input.segments || input.segments.length === 0) {
+      return { segments: [] };
+    }
     const {output} = await prompt(input);
     return output!;
   }

@@ -1,3 +1,5 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export type Segment = {
   id: string;
   type: 'flight' | 'lodging' | 'train' | 'ferry' | 'bus' | 'activity' | 'car';
@@ -5,12 +7,13 @@ export type Segment = {
   title: string;
   provider: string;
   confirmationCode: string;
-  startTime: string;
-  endTime: string;
+  startTime: string; // Keep as string for mock/display HH:mm
+  endTime: string; // Keep as string for mock/display HH:mm
   startLocation: string;
   endLocation: string;
   startLocationShort: string;
   endLocationShort: string;
+  date: Timestamp;
   duration?: string;
   details?: Record<string, string>;
   media?: { type: 'qr' | 'pdf'; url: string }[];
@@ -25,11 +28,24 @@ export type DayGroup = {
 export type Trip = {
   id: string;
   title: string;
-  itinerary: DayGroup[];
+  startDate: Timestamp;
+  endDate: Timestamp;
+  icon: string;
+};
+
+// Original trip type from mock data for seeding
+export type MockTrip = {
+  id: string;
+  title: string;
   startDate: string;
   endDate: string;
   icon: string;
-};
+  itinerary: {
+    date: string;
+    day: string;
+    segments: Omit<Segment, 'date'>[];
+  }[];
+}
 
 export type InboxMessage = {
   id: string;

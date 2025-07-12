@@ -1,0 +1,31 @@
+'use server';
+
+import { db } from '@/lib/firebase';
+import { collection, getDocs, doc, getDoc, query, orderBy } from 'firebase/firestore';
+import type { Trip, Segment } from './types';
+
+export async function getTrips(): Promise<Trip[]> {
+  const tripsCol = collection(db, 'trips');
+  const tripsSnapshot = await getDocs(query(tripsCol, orderBy('startDate', 'asc')));
+  const tripsList = tripsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Trip));
+  return tripsList;
+}
+
+export async function getTrip(tripId: string): Promise<Trip | null> {
+    const tripDocRef = doc(db, 'trips', tripId);
+    const tripDoc = await getDoc(tripDocRef);
+
+    if (!tripDoc.exists()) {
+        return null;
+    }
+
+    return { id: tripDoc.id, ...tripDoc.data() } as Trip;
+}
+
+
+export async function getTripSegments(tripId: string): Promise<Segment[]> {
+    const segmentsCol = collection(db, `trips/${tripId}/segments`);
+    const segmentsSnapshot = await getDocs(query(segmentsCol, orderBy('date', 'asc')));
+    const segmentsList = segmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Segment));
+    return segmentsList;
+}

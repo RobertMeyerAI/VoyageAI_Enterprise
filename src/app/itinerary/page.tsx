@@ -1,22 +1,25 @@
-'use client';
-
 import Link from 'next/link';
-import { trips } from '@/lib/mock-data';
+import { getTrips } from '@/lib/data';
 import type { Trip } from '@/lib/types';
-import {
-  Card,
-} from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
 import * as icons from 'lucide-react';
+import type { Timestamp } from 'firebase/firestore';
 
-function formatDateRange(startDateStr: string, endDateStr: string) {
-  const startDate = new Date(startDateStr);
-  const endDate = new Date(endDateStr);
+function formatDateRange(startDate: Timestamp, endDate: Timestamp) {
+  const start = startDate.toDate();
+  const end = endDate.toDate();
 
-  const startMonth = startDate.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' });
-  const startDay = startDate.getUTCDate();
-  const endMonth = endDate.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' });
-  const endDay = endDate.getUTCDate();
+  const startMonth = start.toLocaleDateString('en-US', {
+    month: 'short',
+    timeZone: 'UTC',
+  });
+  const startDay = start.getUTCDate();
+  const endMonth = end.toLocaleDateString('en-US', {
+    month: 'short',
+    timeZone: 'UTC',
+  });
+  const endDay = end.getUTCDate();
 
   if (startMonth === endMonth) {
     return `${startMonth} ${startDay} - ${endDay}`;
@@ -48,7 +51,9 @@ function TripCard({ trip }: { trip: Trip }) {
   );
 }
 
-export default function ItineraryListPage() {
+export default async function ItineraryListPage() {
+  const trips = await getTrips();
+
   return (
     <div className="flex flex-col gap-8">
       <header>
@@ -60,7 +65,7 @@ export default function ItineraryListPage() {
         </p>
       </header>
       <div className="flex flex-col gap-4">
-        {trips.map((trip) => (
+        {trips.map(trip => (
           <TripCard key={trip.id} trip={trip} />
         ))}
       </div>
