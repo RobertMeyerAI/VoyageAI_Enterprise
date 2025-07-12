@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -29,6 +30,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 const GlobeIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -59,6 +61,11 @@ const navItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <SidebarProvider>
@@ -79,7 +86,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname.startsWith(item.href)}
+                  isActive={isClient ? pathname.startsWith(item.href) : false}
                   tooltip={item.label}
                 >
                   <Link href={item.href}>
@@ -140,7 +147,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={`flex h-14 flex-1 flex-col items-center justify-center gap-1 rounded-none text-xs ${
-                  pathname.startsWith(item.href)
+                  isClient && pathname.startsWith(item.href)
                     ? 'text-primary'
                     : 'text-muted-foreground'
                 }`}
