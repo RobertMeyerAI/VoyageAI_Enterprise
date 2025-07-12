@@ -60,7 +60,7 @@ const statusColors: Record<Segment['status'], string> = {
 };
 
 export function SegmentCard({ segment }: { segment: Segment }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(segment.id === 'seg1');
 
   return (
     <Collapsible
