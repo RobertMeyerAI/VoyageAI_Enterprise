@@ -69,24 +69,26 @@ export function SegmentCard({ segment }: { segment: Segment }) {
       onOpenChange={setIsOpen}
     >
       <Card className="overflow-hidden transition-all hover:shadow-lg hover:shadow-primary/10">
-        <CardHeader className="flex flex-row items-start gap-4 space-y-0 bg-secondary/30 p-4">
+        <CardHeader className="flex flex-row items-center gap-3 space-y-0 bg-secondary/30 p-2">
           <div
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary ${
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary ${
               segmentColors[segment.type]
             }`}
           >
             {segmentIcons[segment.type]}
           </div>
-          <div className="flex-1">
-            <CardTitle className="text-base font-semibold">
+          <div className="flex-1 overflow-hidden">
+            <div className="truncate text-sm font-semibold">
               {segment.title}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">{segment.provider}</p>
+            </div>
+            <div className="truncate text-xs text-muted-foreground">
+              {segment.provider}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Badge
               variant="outline"
-              className={`text-xs capitalize ${statusColors[segment.status]}`}
+              className={`hidden text-xs capitalize sm:inline-flex ${statusColors[segment.status]}`}
             >
               {segment.status}
             </Badge>
@@ -103,7 +105,6 @@ export function SegmentCard({ segment }: { segment: Segment }) {
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent className='p-0'></CardContent>
         <CollapsibleContent>
             <div className="border-t border-dashed p-4 text-sm space-y-4">
             <div className="flex items-center justify-between">
