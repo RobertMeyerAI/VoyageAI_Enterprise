@@ -103,52 +103,53 @@ export function SegmentCard({ segment }: { segment: Segment }) {
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent className="p-4 text-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="font-mono text-lg font-medium">
-                {segment.startTime}
-              </span>
-              <span className="text-muted-foreground">
-                {segment.startLocationShort}
-              </span>
-            </div>
-            <div className="flex flex-col items-center text-muted-foreground">
-              <ArrowRight className="h-4 w-4" />
-              {segment.duration && (
-                <span className="text-xs">{segment.duration}</span>
-              )}
-            </div>
-            <div className="flex flex-col items-end">
-              <span className="font-mono text-lg font-medium">
-                {segment.endTime}
-              </span>
-              <span className="text-muted-foreground">
-                {segment.endLocationShort}
-              </span>
-            </div>
-          </div>
-        </CardContent>
+        <CardContent className='p-0'></CardContent>
         <CollapsibleContent>
-            <div className="border-t border-dashed p-4 text-sm">
-            <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Confirmation:</span>
-                <span className="font-mono font-medium text-foreground">
-                {segment.confirmationCode}
+            <div className="border-t border-dashed p-4 text-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="font-mono text-lg font-medium">
+                  {segment.startTime}
                 </span>
+                <span className="text-muted-foreground">
+                  {segment.startLocationShort}
+                </span>
+              </div>
+              <div className="flex flex-col items-center text-muted-foreground">
+                <ArrowRight className="h-4 w-4" />
+                {segment.duration && (
+                  <span className="text-xs">{segment.duration}</span>
+                )}
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="font-mono text-lg font-medium">
+                  {segment.endTime}
+                </span>
+                <span className="text-muted-foreground">
+                  {segment.endLocationShort}
+                </span>
+              </div>
             </div>
-            {segment.details &&
-                Object.entries(segment.details).map(([key, value]) => (
-                <div
-                    key={key}
-                    className="mt-1 flex justify-between text-xs text-muted-foreground"
-                >
-                    <span>{key}:</span>
-                    <span className="font-mono font-medium text-foreground">
-                    {value}
-                    </span>
-                </div>
-                ))}
+            <div className="space-y-1 border-t pt-4">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Confirmation:</span>
+                  <span className="font-mono font-medium text-foreground">
+                  {segment.confirmationCode}
+                  </span>
+              </div>
+              {segment.details &&
+                  Object.entries(segment.details).map(([key, value]) => (
+                  <div
+                      key={key}
+                      className="flex justify-between text-xs text-muted-foreground"
+                  >
+                      <span>{key}:</span>
+                      <span className="font-mono font-medium text-foreground">
+                      {value}
+                      </span>
+                  </div>
+                  ))}
+              </div>
             </div>
         </CollapsibleContent>
         <CardFooter className='p-0 border-t'>
