@@ -21,6 +21,7 @@ export default function ItineraryPage() {
               {new Date(dayGroup.date).toLocaleDateString('en-US', {
                 month: 'long',
                 day: 'numeric',
+                timeZone: 'UTC',
               })}
             </h2>
           </div>
