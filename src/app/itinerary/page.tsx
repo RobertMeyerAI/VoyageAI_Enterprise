@@ -1,3 +1,4 @@
+'use client';
 import { SegmentCard } from '@/components/segment-card';
 import { itineraryData, tripTitle } from '@/lib/mock-data';
 

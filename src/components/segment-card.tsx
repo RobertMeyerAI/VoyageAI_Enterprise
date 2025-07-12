@@ -14,6 +14,7 @@ import {
 import {
   Card,
   CardContent,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -25,6 +26,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { useState } from 'react';
 
 const segmentIcons: Record<Segment['type'], React.ReactNode> = {
   flight: <Plane className="h-5 w-5" />,
@@ -53,87 +60,106 @@ const statusColors: Record<Segment['status'], string> = {
 };
 
 export function SegmentCard({ segment }: { segment: Segment }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg hover:shadow-primary/10">
-      <CardHeader className="flex flex-row items-start gap-4 space-y-0 bg-secondary/30 p-4">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary ${
-            segmentColors[segment.type]
-          }`}
-        >
-          {segmentIcons[segment.type]}
-        </div>
-        <div className="flex-1">
-          <CardTitle className="text-base font-semibold">{segment.title}</CardTitle>
-          <p className="text-sm text-muted-foreground">{segment.provider}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge
-            variant="outline"
-            className={`text-xs capitalize ${statusColors[segment.status]}`}
+    <Collapsible
+      asChild
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <Card className="overflow-hidden transition-all hover:shadow-lg hover:shadow-primary/10">
+        <CardHeader className="flex flex-row items-start gap-4 space-y-0 bg-secondary/30 p-4">
+          <div
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary ${
+              segmentColors[segment.type]
+            }`}
           >
-            {segment.status}
-          </Badge>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>View Details</DropdownMenuItem>
-              <DropdownMenuItem>Add Note</DropdownMenuItem>
-              <DropdownMenuItem>Share Segment</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardHeader>
-      <CardContent className="p-4 text-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="font-mono text-lg font-medium">
-              {segment.startTime}
-            </span>
-            <span className="text-muted-foreground">
-              {segment.startLocationShort}
-            </span>
+            {segmentIcons[segment.type]}
           </div>
-          <div className="flex flex-col items-center text-muted-foreground">
-            <ArrowRight className="h-4 w-4" />
-            {segment.duration && (
-              <span className="text-xs">{segment.duration}</span>
-            )}
+          <div className="flex-1">
+            <CardTitle className="text-base font-semibold">
+              {segment.title}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">{segment.provider}</p>
           </div>
-          <div className="flex flex-col items-end">
-            <span className="font-mono text-lg font-medium">
-              {segment.endTime}
-            </span>
-            <span className="text-muted-foreground">
-              {segment.endLocationShort}
-            </span>
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className={`text-xs capitalize ${statusColors[segment.status]}`}
+            >
+              {segment.status}
+            </Badge>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>Add Note</DropdownMenuItem>
+                <DropdownMenuItem>Share Segment</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        </div>
-        <div className="mt-4 border-t border-dashed pt-4">
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Confirmation:</span>
-            <span className="font-mono font-medium text-foreground">
-              {segment.confirmationCode}
-            </span>
+        </CardHeader>
+        <CardContent className="p-4 text-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="font-mono text-lg font-medium">
+                {segment.startTime}
+              </span>
+              <span className="text-muted-foreground">
+                {segment.startLocationShort}
+              </span>
+            </div>
+            <div className="flex flex-col items-center text-muted-foreground">
+              <ArrowRight className="h-4 w-4" />
+              {segment.duration && (
+                <span className="text-xs">{segment.duration}</span>
+              )}
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="font-mono text-lg font-medium">
+                {segment.endTime}
+              </span>
+              <span className="text-muted-foreground">
+                {segment.endLocationShort}
+              </span>
+            </div>
           </div>
-          {segment.details &&
-            Object.entries(segment.details).map(([key, value]) => (
-              <div
-                key={key}
-                className="mt-1 flex justify-between text-xs text-muted-foreground"
-              >
-                <span>{key}:</span>
+        </CardContent>
+        <CollapsibleContent>
+            <div className="border-t border-dashed p-4 text-sm">
+            <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Confirmation:</span>
                 <span className="font-mono font-medium text-foreground">
-                  {value}
+                {segment.confirmationCode}
                 </span>
-              </div>
-            ))}
-        </div>
-      </CardContent>
-    </Card>
+            </div>
+            {segment.details &&
+                Object.entries(segment.details).map(([key, value]) => (
+                <div
+                    key={key}
+                    className="mt-1 flex justify-between text-xs text-muted-foreground"
+                >
+                    <span>{key}:</span>
+                    <span className="font-mono font-medium text-foreground">
+                    {value}
+                    </span>
+                </div>
+                ))}
+            </div>
+        </CollapsibleContent>
+        <CardFooter className='p-0 border-t'>
+            <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="w-full h-9 rounded-t-none">
+                    <span>{isOpen ? 'Hide' : 'View'} Details</span>
+                    <ChevronDown className={`h-4 w-4 ml-2 transition-transform ${isOpen && 'rotate-180'}`} />
+                </Button>
+            </CollapsibleTrigger>
+        </CardFooter>
+      </Card>
+    </Collapsible>
   );
 }
