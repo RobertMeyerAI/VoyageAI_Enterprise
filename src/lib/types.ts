@@ -66,3 +66,11 @@ export type AiChatMessage = {
   role: 'user' | 'assistant' | 'system';
   content: string;
 };
+
+export type Alert = {
+  id: string;
+  severity: 'critical' | 'warning' | 'info';
+  title: string;
+  description: string;
+  time: string;
+};

@@ -1,4 +1,4 @@
-import type { Trip, InboxMessage, Connection } from './types';
+import type { Trip, InboxMessage, Connection, Alert } from './types';
 
 export const trips: Trip[] = [
   {
@@ -275,5 +275,36 @@ export const connectionsData: Connection[] = [
         isBest: null,
       },
     ],
+  },
+];
+
+export const alertsData: Alert[] = [
+  {
+    id: 'alert1',
+    severity: 'critical',
+    title: 'Flight SK944 Cancelled',
+    description: 'Your flight to Copenhagen has been cancelled due to airline operational issues. Please contact Scandinavian Airlines to rebook.',
+    time: '25 min ago',
+  },
+  {
+    id: 'alert2',
+    severity: 'warning',
+    title: 'Weather Warning in Stockholm',
+    description: 'Heavy rainfall expected in Stockholm on July 24th. Outdoor activities may be impacted. Pack accordingly.',
+    time: '3 hours ago',
+  },
+  {
+    id: 'alert3',
+    severity: 'warning',
+    title: 'Low Balance on Transit Card',
+    description: 'Your Copenhagen transit card balance is low. Top up to avoid issues.',
+    time: '1 day ago',
+  },
+  {
+    id: 'alert4',
+    severity: 'info',
+    title: 'Visa Expiry Reminder',
+    description: 'Your Schengen visa expires in 30 days. Plan your next trip!',
+    time: '2 days ago',
   },
 ];

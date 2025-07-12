@@ -26,6 +26,7 @@ import {
   Map,
   Plane,
   Settings,
+  Siren,
   Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -56,6 +57,7 @@ const navItems = [
   { href: '/map', icon: Map, label: 'Map' },
   { href: '/inbox', icon: Inbox, label: 'Inbox' },
   { href: '/connections', icon: Cable, label: 'Connections' },
+  { href: '/alerts', icon: Siren, label: 'Alerts' },
   { href: '/ai', icon: Sparkles, label: 'Ask Atlas' },
 ];
 
@@ -84,7 +86,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             {navItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <Link href={item.href} passHref>
+                <Link href={item.href} passHref legacyBehavior>
                   <SidebarMenuButton
                     as="a"
                     isActive={isClient ? pathname.startsWith(item.href) : false}
