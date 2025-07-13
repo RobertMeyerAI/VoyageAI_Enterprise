@@ -11,12 +11,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   HelpCircle,
-  Inbox,
-  Sparkles,
-  Mail,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { handleSignIn } from '@/lib/auth';
 
 const statusInfo: Record<
   InboxMessage['status'],
@@ -48,12 +43,9 @@ export default function InboxPage() {
             Travel Inbox
           </h1>
           <p className="text-muted-foreground">
-            AI-curated summaries from your connected email.
+            Status of reservations processed from the magic inbox.
           </p>
         </div>
-        <Button onClick={handleSignIn}>
-          <Mail className="mr-2 h-4 w-4" /> Connect Gmail Account
-        </Button>
       </header>
       <div className="space-y-4">
         {inboxData.map((message) => (
