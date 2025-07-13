@@ -65,9 +65,15 @@ export function NewSegmentForm({ tripId }: { tripId: string }) {
   });
 
   const onSubmit = (data: NewSegmentData) => {
+    // Ensure date is not null before proceeding
+    if (!data.date) {
+        form.setError("date", { type: "manual", message: "Date is required." });
+        return;
+    }
+
     startTransition(async () => {
       try {
-        await addSegment(tripId, data);
+        await addSegment(tripId, data as NewSegmentData & { date: Date });
         toast({
           title: 'Success!',
           description: `New segment "${data.title}" has been added.`,
