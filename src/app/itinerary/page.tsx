@@ -4,7 +4,7 @@ import type { Trip } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
 import * as icons from 'lucide-react';
-import type { Timestamp } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 import { tripsData as mockTripsData } from '@/lib/mock-data';
 
 function formatDateRange(startDate: Timestamp, endDate: Timestamp) {
