@@ -17,20 +17,35 @@ export async function getTrips(): Promise<Trip[]> {
 }
 
 export async function getTrip(tripId: string): Promise<Trip | null> {
-    const tripDocRef = doc(db, 'trips', tripId);
-    const tripDoc = await getDoc(tripDocRef);
+    try {
+        const tripDocRef = doc(db, 'trips', tripId);
+        const tripDoc = await getDoc(tripDocRef);
 
-    if (!tripDoc.exists()) {
+        if (!tripDoc.exists()) {
+            console.log(`Trip with ID ${tripId} not found.`);
+            return null;
+        }
+
+        return { id: tripDoc.id, ...tripDoc.data() } as Trip;
+    } catch (error: any) {
+        console.error(`Firebase Error: Failed to fetch trip ${tripId}.`, error.message);
         return null;
     }
-
-    return { id: tripDoc.id, ...tripDoc.data() } as Trip;
 }
 
 
 export async function getTripSegments(tripId: string): Promise<Segment[]> {
-    const segmentsCol = collection(db, `trips/${tripId}/segments`);
-    const segmentsSnapshot = await getDocs(query(segmentsCol, orderBy('date', 'asc')));
-    const segmentsList = segmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Segment));
-    return segmentsList;
+    try {
+        const segmentsCol = collection(db, `trips/${tripId}/segments`);
+        const segmentsSnapshot = await getDocs(query(segmentsCol, orderBy('date', 'asc')));
+        if (segmentsSnapshot.empty) {
+            console.log(`No segments found for trip ${tripId}.`);
+            return [];
+        }
+        const segmentsList = segmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Segment));
+        return segmentsList;
+    } catch (error: any) {
+        console.error(`Firebase Error: Failed to fetch segments for trip ${tripId}.`, error.message);
+        return [];
+    }
 }
