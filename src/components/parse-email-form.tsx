@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { addSegmentFromEmail } from '@/lib/data';
+import { addSegmentFromEmail, getTripSegments } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +28,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, Loader2, Wand2 } from 'lucide-react';
 import { extractSegmentFromEmail } from '@/ai/flows/extract-segment-from-email-flow';
+import type { SerializedSegment } from '@/lib/types';
 
 const ParseEmailSchema = z.object({
   emailBody: z.string().min(50, 'Email content seems too short to be a reservation.'),
@@ -50,7 +51,17 @@ export function ParseEmailForm({ tripId }: { tripId: string }) {
   const onSubmit = (data: ParseEmailData) => {
     startTransition(async () => {
       try {
-        const extractionResult = await extractSegmentFromEmail({ emailBody: data.emailBody });
+        // Fetch existing segments to check for duplicates
+        const existingSegmentsResult = await getTripSegments(tripId);
+        const serializedSegments: SerializedSegment[] = existingSegmentsResult.map(segment => ({
+            ...segment,
+            date: segment.date.toDate().toISOString(),
+        }));
+
+        const extractionResult = await extractSegmentFromEmail({ 
+            emailBody: data.emailBody,
+            existingSegments: serializedSegments,
+        });
 
         if (!extractionResult.isTravelEmail || !extractionResult.segment) {
           toast({
@@ -59,6 +70,15 @@ export function ParseEmailForm({ tripId }: { tripId: string }) {
             description: "The AI couldn't find any travel information in the text you provided.",
           });
           return;
+        }
+
+        if (extractionResult.isDuplicate) {
+            toast({
+              variant: 'default',
+              title: 'Duplicate Reservation',
+              description: "This reservation appears to already be in your itinerary.",
+            });
+            return;
         }
 
         await addSegmentFromEmail(tripId, extractionResult.segment);

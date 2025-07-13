@@ -15,6 +15,9 @@ import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { v4 as uuidv4 } from 'uuid';
 import { config } from 'dotenv';
+import { getTripSegments } from '@/lib/data';
+import type { SerializedSegment } from '@/lib/types';
+
 
 // Load environment variables from .env file
 config({ path: '.env' });
@@ -68,6 +71,15 @@ const processEmailsFlow = ai.defineFlow(
 
       console.log(`Found ${messages.length} new emails. Processing...`);
       let processedCount = 0;
+      let duplicateCount = 0;
+
+      // TODO: The tripId should be determined dynamically. Hardcoding for now.
+      const tripId = 'scandinavia-2025';
+      const existingSegmentsResult = await getTripSegments(tripId);
+      const serializedSegments: SerializedSegment[] = existingSegmentsResult.map(segment => ({
+          ...segment,
+          date: segment.date.toDate().toISOString(),
+      }));
 
       for (const message of messages) {
         if (!message.id) continue;
@@ -78,7 +90,6 @@ const processEmailsFlow = ai.defineFlow(
           format: 'full',
         });
 
-        // Find the plain text part of the email
         let emailBody = '';
         const parts = msg.data.payload?.parts;
         if (parts) {
@@ -90,24 +101,29 @@ const processEmailsFlow = ai.defineFlow(
         
         if (emailBody) {
             console.log(`--- Parsing Email ID: ${message.id} ---`);
-            const extractionResult = await extractSegmentFromEmail({ emailBody });
+            const extractionResult = await extractSegmentFromEmail({ 
+                emailBody,
+                existingSegments: serializedSegments,
+            });
             
             if (extractionResult.isTravelEmail && extractionResult.segment) {
-                console.log(`Extracted segment: ${extractionResult.segment.title}`);
-                const newSegment = {
-                    ...extractionResult.segment,
-                    date: Timestamp.fromDate(new Date(extractionResult.segment.date)),
+                if (extractionResult.isDuplicate) {
+                    console.log(`Segment is a duplicate. Skipping.`);
+                    duplicateCount++;
+                } else {
+                    console.log(`Extracted segment: ${extractionResult.segment.title}`);
+                    const newSegment = {
+                        ...extractionResult.segment,
+                        date: Timestamp.fromDate(new Date(extractionResult.segment.date)),
+                    }
+    
+                    const segmentId = uuidv4();
+                    const segmentDocRef = doc(db, 'trips', tripId, 'segments', segmentId);
+                    await setDoc(segmentDocRef, newSegment);
+                    
+                    console.log(`Saved segment ${segmentId} to trip ${tripId}`);
+                    processedCount++;
                 }
-
-                // TODO: The tripId should be determined dynamically, e.g., from the user context
-                // or by matching details in the email. Hardcoding for now.
-                const tripId = 'scandinavia-2025';
-                const segmentId = uuidv4();
-                const segmentDocRef = doc(db, 'trips', tripId, 'segments', segmentId);
-                await setDoc(segmentDocRef, newSegment);
-                
-                console.log(`Saved segment ${segmentId} to trip ${tripId}`);
-                processedCount++;
             } else {
                 console.log('Email was not a travel reservation. Skipping.');
             }
@@ -125,7 +141,7 @@ const processEmailsFlow = ai.defineFlow(
 
       return {
         success: true,
-        message: `Email sync complete. ${messages.length} email(s) checked, ${processedCount} new segment(s) added.`,
+        message: `Email sync complete. ${messages.length} email(s) checked, ${processedCount} new segment(s) added. ${duplicateCount} duplicate(s) ignored.`,
       };
 
     } catch (error: any) {
