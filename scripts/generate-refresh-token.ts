@@ -19,6 +19,9 @@ if (!clientId || !clientSecret) {
   process.exit(1);
 }
 
+// IMPORTANT: This script runs a local server to capture the OAuth callback.
+// You MUST add `http://localhost:3000/oauth2callback` as an "Authorized redirect URI"
+// in your Google Cloud Console's OAuth 2.0 Client ID settings for this script to work.
 const REDIRECT_URI = 'http://localhost:3000/oauth2callback';
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 
