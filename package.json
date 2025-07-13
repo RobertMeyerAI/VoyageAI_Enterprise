@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "genkit:dev": "genkit start",
-    "genkit:watch": "genkit start --watch",
+    "genkit:dev": "genkit start --port 3500 --no-ui",
+    "genkit:watch": "genkit start --port 3500 --no-ui --watch",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
