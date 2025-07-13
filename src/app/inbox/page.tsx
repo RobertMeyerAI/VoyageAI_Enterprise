@@ -63,11 +63,6 @@ export default function InboxPage() {
     }
   };
 
-  useEffect(() => {
-    // Run sync on initial page load
-    handleSync();
-  }, []);
-
 
   return (
     <div className="flex flex-col gap-8">
