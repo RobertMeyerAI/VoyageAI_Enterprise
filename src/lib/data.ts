@@ -5,10 +5,15 @@ import { collection, getDocs, doc, getDoc, query, orderBy } from 'firebase/fires
 import type { Trip, Segment } from './types';
 
 export async function getTrips(): Promise<Trip[]> {
-  const tripsCol = collection(db, 'trips');
-  const tripsSnapshot = await getDocs(query(tripsCol, orderBy('startDate', 'asc')));
-  const tripsList = tripsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Trip));
-  return tripsList;
+  try {
+    const tripsCol = collection(db, 'trips');
+    const tripsSnapshot = await getDocs(query(tripsCol, orderBy('startDate', 'asc')));
+    const tripsList = tripsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Trip));
+    return tripsList;
+  } catch (error: any) {
+    console.error("Firebase Error: Failed to fetch trips. Please ensure that you have created a Firestore database in your Firebase project ('atlasnomad') and that your security rules allow read access.", error.message);
+    return [];
+  }
 }
 
 export async function getTrip(tripId: string): Promise<Trip | null> {
