@@ -1,16 +1,21 @@
 
 'use client';
 
+import { useState, useEffect, useTransition } from 'react';
 import {
   Card,
   CardContent,
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { inboxData } from '@/lib/mock-data';
 import type { InboxMessage } from '@/lib/types';
+import { processEmails } from '@/ai/flows/process-emails-flow';
 import {
   AlertTriangle,
   CheckCircle2,
   HelpCircle,
+  RefreshCw,
 } from 'lucide-react';
 
 const statusInfo: Record<
@@ -35,6 +40,35 @@ const statusInfo: Record<
 };
 
 export default function InboxPage() {
+  const [isSyncing, setIsSyncing] = useState(false);
+  const { toast } = useToast();
+
+  const handleSync = async () => {
+    setIsSyncing(true);
+    try {
+      const result = await processEmails();
+      toast({
+        title: "Sync Complete",
+        description: result.message,
+      });
+    } catch (error) {
+      console.error("Failed to sync emails:", error);
+      toast({
+        variant: "destructive",
+        title: "Sync Failed",
+        description: "Could not sync with the magic mailbox. Please try again.",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    // Run sync on initial page load
+    handleSync();
+  }, []);
+
+
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -46,6 +80,10 @@ export default function InboxPage() {
             Status of reservations processed from the magic inbox.
           </p>
         </div>
+        <Button onClick={handleSync} disabled={isSyncing}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span>{isSyncing ? 'Syncing...' : 'Sync with AI'}</span>
+        </Button>
       </header>
       <div className="space-y-4">
         {inboxData.map((message) => (
