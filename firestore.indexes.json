@@ -2,7 +2,7 @@
   "indexes": [
     {
       "collectionGroup": "segments",
-      "queryScope": "COLLECTION",
+      "queryScope": "COLLECTION_GROUP",
       "fields": [
         {
           "fieldPath": "date",

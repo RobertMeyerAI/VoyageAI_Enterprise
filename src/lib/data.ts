@@ -75,7 +75,7 @@ export async function deleteTrip(tripId: string): Promise<void> {
 }
 
 
-export async function addSegment(tripId: string, segmentData: NewSegmentData): Promise<string> {
+export async function addSegment(tripId: string, segmentData: NewSegmentData & { date: Date }): Promise<string> {
     try {
         const segmentsCol = collection(db, `trips/${tripId}/segments`);
         
