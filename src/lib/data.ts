@@ -75,12 +75,14 @@ export async function deleteTrip(tripId: string): Promise<void> {
 }
 
 
-export async function addSegment(tripId: string, segmentData: NewSegmentData & { date: Date }): Promise<string> {
+export async function addSegment(tripId: string, segmentData: NewSegmentData): Promise<string> {
     try {
         const segmentsCol = collection(db, `trips/${tripId}/segments`);
         
-        // The date is already validated as a non-null Date object by the form.
-        // We can safely create the Timestamp.
+        if (!segmentData.date) {
+            throw new Error("Cannot add segment without a date.");
+        }
+
         const dataToSave = {
             ...segmentData,
             date: Timestamp.fromDate(segmentData.date),
