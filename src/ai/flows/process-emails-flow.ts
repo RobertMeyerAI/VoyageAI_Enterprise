@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for processing travel emails from a magic mailbox.
@@ -29,32 +30,25 @@ const processEmailsFlow = ai.defineFlow(
   async () => {
     console.log('Checking magic mailbox for new travel emails...');
 
-    const serviceAccountJson = process.env.GMAIL_SERVICE_ACCOUNT_JSON;
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
     const magicMailboxEmail = process.env.MAGIC_MAILBOX_EMAIL;
 
-    if (!serviceAccountJson || !magicMailboxEmail) {
-      const message = 'Service account or magic mailbox email not configured in .env';
+    if (!clientId || !clientSecret || !refreshToken || !magicMailboxEmail) {
+      const message = 'Gmail OAuth credentials or magic mailbox email not configured in .env';
       console.error(message);
       return { success: false, message };
     }
 
     try {
-      const credentials = JSON.parse(serviceAccountJson);
+      const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
+      oauth2Client.setCredentials({ refresh_token: refreshToken });
 
-      const auth = new google.auth.GoogleAuth({
-        credentials,
-        scopes: ['https://www.googleapis.com/auth/gmail.readonly'],
-      });
-
-      // We need to impersonate a user in the G-Suite domain to read emails
-      const authClient = await auth.getClient();
-      // @ts-ignore - subject is not in the type definition but is required for domain-wide delegation
-      authClient.subject = magicMailboxEmail;
-      
-      const gmail = google.gmail({ version: 'v1', auth: authClient });
+      const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
       
       const res = await gmail.users.messages.list({
-        userId: 'me',
+        userId: magicMailboxEmail,
         q: 'is:unread', // Fetch only unread emails
       });
 
@@ -70,7 +64,7 @@ const processEmailsFlow = ai.defineFlow(
         if (!message.id) continue;
         
         const msg = await gmail.users.messages.get({
-          userId: 'me',
+          userId: magicMailboxEmail,
           id: message.id,
           format: 'full', // We want the full email payload
         });
@@ -87,7 +81,7 @@ const processEmailsFlow = ai.defineFlow(
 
         // Mark the email as read after processing
         await gmail.users.messages.modify({
-            userId: 'me',
+            userId: magicMailboxEmail,
             id: message.id,
             requestBody: {
                 removeLabelIds: ['UNREAD']
@@ -102,6 +96,9 @@ const processEmailsFlow = ai.defineFlow(
 
     } catch (error: any) {
         console.error('Failed to process emails:', error.message);
+        if (error.response?.data?.error === 'invalid_grant') {
+          return { success: false, message: `Authentication failed (invalid_grant). Your refresh token may be invalid or expired. Please re-run 'npm run gmail:get-token'.`};
+        }
         return { success: false, message: `An error occurred: ${error.message}`};
     }
   }
