@@ -76,7 +76,7 @@ export const NewSegmentSchema = z.object({
   endLocation: z.string().min(1, "End location is required."),
   startLocationShort: z.string().min(1, "Short start location is required."),
   endLocationShort: z.string().min(1, "Short end location is required."),
-  date: z.date({ required_error: "Date is required." }),
+  date: z.date({ required_error: "Date is required." }).nullable(),
 });
 export type NewSegmentData = z.infer<typeof NewSegmentSchema>;
 
