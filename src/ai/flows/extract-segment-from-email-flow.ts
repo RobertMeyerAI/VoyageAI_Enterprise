@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for extracting structured travel segment data from an email body.
@@ -26,7 +27,7 @@ const ExtractedSegmentSchema = z.object({
     endLocationShort: z.string().describe("A short code for the end location (e.g., airport code 'CPH')."),
     date: z.string().describe("The primary date of the segment in YYYY-MM-DD format."),
     duration: z.string().optional().describe("The duration of the travel segment, if available."),
-    details: z.record(z.string()).optional().describe("An object for additional details like Gate, Seat, Terminal, etc."),
+    details: z.any().optional().describe("An object for additional details like Gate, Seat, Terminal, etc."),
 });
 
 const ExtractSegmentFromEmailInputSchema = z.object({
