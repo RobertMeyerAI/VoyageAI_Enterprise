@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { SegmentCard } from '@/components/segment-card';
@@ -36,21 +37,27 @@ export function ItineraryView({ trip, initialItinerary }: ItineraryViewProps) {
 
         const result = await getLiveItineraryStatus({ segments: allSegmentsForAI });
         
-        const updatedSegmentsById = new Map<string, SerializedSegment>();
-        result.segments.forEach(segment => {
-          // Find original segment to preserve timestamp object
-          const originalSegment = allSegments.find(s => s.id === segment.id);
-          if (originalSegment) {
-            updatedSegmentsById.set(segment.id, { ...originalSegment, ...segment, date: originalSegment.date });
-          }
-        });
-
-        const updatedItinerary = initialItinerary.map(dayGroup => ({
-          ...dayGroup,
-          segments: dayGroup.segments.map(segment => updatedSegmentsById.get(segment.id) || segment),
-        }));
-        
-        setItinerary(updatedItinerary);
+        // Add a defensive check to ensure the result from the AI is valid
+        if (result && result.segments) {
+            const updatedSegmentsById = new Map<string, SerializedSegment>();
+            result.segments.forEach(segment => {
+              // Find original segment to preserve timestamp object
+              const originalSegment = allSegments.find(s => s.id === segment.id);
+              if (originalSegment) {
+                updatedSegmentsById.set(segment.id, { ...originalSegment, ...segment, date: originalSegment.date });
+              }
+            });
+    
+            const updatedItinerary = initialItinerary.map(dayGroup => ({
+              ...dayGroup,
+              segments: dayGroup.segments.map(segment => updatedSegmentsById.get(segment.id) || segment),
+            }));
+            
+            setItinerary(updatedItinerary);
+        } else {
+            // If AI result is invalid, fallback to initial data
+            setItinerary(initialItinerary);
+        }
       } catch (error) {
         console.error("Failed to fetch live itinerary status:", error);
         // Fallback to initial data in case of an error
