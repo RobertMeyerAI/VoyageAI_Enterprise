@@ -1,3 +1,4 @@
+
 import type { Timestamp } from 'firebase/firestore';
 import { z } from 'zod';
 
@@ -26,7 +27,7 @@ export type SerializedSegment = Omit<Segment, 'date'> & {
 };
 
 
-// This version of Segment is specifically for the mock data structure
+// This version of Segment is for the mock data structure
 export type MockSegment = Omit<Segment, 'date'>;
 
 
@@ -53,8 +54,8 @@ export type SerializedTrip = Omit<Trip, 'startDate' | 'endDate'> & {
 // Data for creating a new Trip
 export const NewTripSchema = z.object({
   title: z.string().min(1, "Title is required."),
-  startDate: z.string().min(1, "Start date is required."),
-  endDate: z.string().min(1, "End date is required."),
+  startDate: z.date({ required_error: "Start date is required." }),
+  endDate: z.date({ required_error: "End date is required." }),
 });
 export type NewTripData = z.infer<typeof NewTripSchema>;
 
@@ -71,7 +72,7 @@ export const NewSegmentSchema = z.object({
   endLocation: z.string().min(1, "End location is required."),
   startLocationShort: z.string().min(1, "Short start location is required."),
   endLocationShort: z.string().min(1, "Short end location is required."),
-  date: z.string().min(1, "Date is required."),
+  date: z.date({ required_error: "Date is required." }),
 });
 export type NewSegmentData = z.infer<typeof NewSegmentSchema>;
 

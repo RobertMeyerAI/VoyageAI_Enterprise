@@ -1,3 +1,4 @@
+
 'use server';
 
 import { db } from '@/lib/firebase';
@@ -10,8 +11,8 @@ export async function addTrip(tripData: NewTripData): Promise<string> {
     const tripsCol = collection(db, 'trips');
     const docRef = await addDoc(tripsCol, {
       ...tripData,
-      startDate: Timestamp.fromDate(new Date(tripData.startDate)),
-      endDate: Timestamp.fromDate(new Date(tripData.endDate)),
+      startDate: Timestamp.fromDate(tripData.startDate),
+      endDate: Timestamp.fromDate(tripData.endDate),
       icon: 'Plane', // Default icon
     });
     console.log('Trip added with ID: ', docRef.id);
@@ -28,7 +29,7 @@ export async function addSegment(tripId: string, segmentData: NewSegmentData): P
         const segmentsCol = collection(db, `trips/${tripId}/segments`);
         const docRef = await addDoc(segmentsCol, {
             ...segmentData,
-            date: Timestamp.fromDate(new Date(segmentData.date)),
+            date: Timestamp.fromDate(segmentData.date),
         });
         console.log(`Segment added with ID: ${docRef.id} to trip ${tripId}`);
         revalidatePath(`/itinerary/${tripId}`);

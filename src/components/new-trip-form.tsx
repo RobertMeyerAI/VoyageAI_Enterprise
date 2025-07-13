@@ -42,8 +42,8 @@ export function NewTripForm() {
     resolver: zodResolver(NewTripSchema),
     defaultValues: {
       title: '',
-      startDate: '',
-      endDate: '',
+      startDate: undefined,
+      endDate: undefined,
     },
   });
 
@@ -125,8 +125,8 @@ export function NewTripForm() {
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
-                        selected={field.value ? new Date(field.value) : undefined}
-                        onSelect={(date) => field.onChange(date?.toISOString().split('T')[0])}
+                        selected={field.value}
+                        onSelect={field.onChange}
                         disabled={(date) => date < new Date("1900-01-01")}
                         initialFocus
                       />
@@ -164,8 +164,8 @@ export function NewTripForm() {
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
-                        selected={field.value ? new Date(field.value) : undefined}
-                        onSelect={(date) => field.onChange(date?.toISOString().split('T')[0])}
+                        selected={field.value}
+                        onSelect={field.onChange}
                         disabled={(date) => date < new Date("1900-01-01")}
                         initialFocus
                       />

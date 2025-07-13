@@ -58,7 +58,7 @@ export function NewSegmentForm({ tripId }: { tripId: string }) {
       endLocation: '',
       startLocationShort: '',
       endLocationShort: '',
-      date: '',
+      date: undefined,
     },
   });
 
@@ -221,8 +221,8 @@ export function NewSegmentForm({ tripId }: { tripId: string }) {
                             <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                                 mode="single"
-                                selected={field.value ? new Date(field.value) : undefined}
-                                onSelect={(date) => field.onChange(date?.toISOString().split('T')[0])}
+                                selected={field.value}
+                                onSelect={field.onChange}
                                 disabled={(date) => date < new Date("1900-01-01")}
                                 initialFocus
                             />
