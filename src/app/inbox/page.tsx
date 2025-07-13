@@ -1,3 +1,6 @@
+
+'use client';
+
 import {
   Card,
   CardContent,
@@ -10,7 +13,10 @@ import {
   HelpCircle,
   Inbox,
   Sparkles,
+  Mail,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { handleSignIn } from '@/lib/auth';
 
 const statusInfo: Record<
   InboxMessage['status'],
@@ -36,13 +42,18 @@ const statusInfo: Record<
 export default function InboxPage() {
   return (
     <div className="flex flex-col gap-8">
-      <header>
-        <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
-          Travel Inbox
-        </h1>
-        <p className="text-muted-foreground">
-          AI-curated summaries from your connected email.
-        </p>
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
+            Travel Inbox
+          </h1>
+          <p className="text-muted-foreground">
+            AI-curated summaries from your connected email.
+          </p>
+        </div>
+        <Button onClick={handleSignIn}>
+          <Mail className="mr-2 h-4 w-4" /> Connect Gmail Account
+        </Button>
       </header>
       <div className="space-y-4">
         {inboxData.map((message) => (
