@@ -1,3 +1,5 @@
+
+'use client';
 import type { Segment } from '@/lib/types';
 import Image from 'next/image';
 import {
@@ -13,6 +15,8 @@ import {
   Train,
   QrCode,
   FileText,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import {
   Card,
@@ -108,8 +112,14 @@ export function SegmentCard({ segment }: { segment: Segment }) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Add Note</DropdownMenuItem>
-                    <DropdownMenuItem>Share Segment</DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      <span>Edit</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-500 focus:text-red-500">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span>Delete</span>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <CollapsibleTrigger asChild>

@@ -1,8 +1,9 @@
 
+
 'use server';
 
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, getDoc, query, orderBy, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, query, orderBy, addDoc, Timestamp, writeBatch, deleteDoc } from 'firebase/firestore';
 import type { Trip, Segment, NewTripData, NewSegmentData } from './types';
 import { revalidatePath } from 'next/cache';
 
@@ -24,6 +25,34 @@ export async function addTrip(tripData: NewTripData): Promise<string> {
   }
 }
 
+export async function deleteTrip(tripId: string): Promise<void> {
+    try {
+        const tripDocRef = doc(db, 'trips', tripId);
+        const segmentsColRef = collection(db, 'trips', tripId, 'segments');
+        
+        const batch = writeBatch(db);
+
+        // Delete all segments in the subcollection
+        const segmentsSnapshot = await getDocs(segmentsColRef);
+        segmentsSnapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        // Delete the trip document itself
+        batch.delete(tripDocRef);
+
+        await batch.commit();
+
+        console.log(`Trip ${tripId} and all its segments have been deleted.`);
+        revalidatePath('/itinerary');
+        revalidatePath(`/itinerary/${tripId}`);
+    } catch (error) {
+        console.error('Error deleting trip: ', error);
+        throw new Error('Failed to delete trip.');
+    }
+}
+
+
 export async function addSegment(tripId: string, segmentData: NewSegmentData): Promise<string> {
     try {
         const segmentsCol = collection(db, `trips/${tripId}/segments`);
@@ -37,6 +66,18 @@ export async function addSegment(tripId: string, segmentData: NewSegmentData): P
     } catch (error) {
         console.error('Error adding segment: ', error);
         throw new Error('Failed to create new segment.');
+    }
+}
+
+export async function deleteSegment(tripId: string, segmentId: string): Promise<void> {
+    try {
+        const segmentDocRef = doc(db, 'trips', tripId, 'segments', segmentId);
+        await deleteDoc(segmentDocRef);
+        console.log(`Segment ${segmentId} deleted from trip ${tripId}.`);
+        revalidatePath(`/itinerary/${tripId}`);
+    } catch (error) {
+        console.error('Error deleting segment: ', error);
+        throw new Error('Failed to delete segment.');
     }
 }
 
