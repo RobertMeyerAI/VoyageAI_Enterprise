@@ -1,10 +1,10 @@
 // A script to seed the Firestore database with initial data.
-// To run: `npx tsx src/lib/seed.ts`
+// To run: `npm run db:seed`
 // Ensure you have configured your .env.local file with your Firebase project details.
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, doc, setDoc, Timestamp, writeBatch } from 'firebase/firestore';
 import { config } from 'dotenv';
-import type { MockTrip } from './types';
+import type { MockTrip } from '../src/lib/types';
 
 // Load environment variables from .env.local
 config({ path: '.env.local' });
@@ -224,8 +224,8 @@ async function seedDatabase() {
   try {
     await batch.commit();
     console.log('\nDatabase seeded successfully!');
-    // process.exit(0) doesn't allow the script to terminate cleanly.
-    // Let the script exit naturally.
+    // Using a timeout to allow Firestore client to gracefully close
+    setTimeout(() => process.exit(0), 1000);
   } catch (error) {
     console.error('\nError seeding database:', error);
     process.exit(1);
