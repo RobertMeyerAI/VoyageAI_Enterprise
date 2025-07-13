@@ -54,9 +54,12 @@ export type SerializedTrip = Omit<Trip, 'startDate' | 'endDate'> & {
 // Data for creating a new Trip
 export const NewTripSchema = z.object({
   title: z.string().min(1, "Title is required."),
-  startDate: z.date({ required_error: "Start date is required." }),
-  endDate: z.date({ required_error: "End date is required." }),
+  startDate: z.date({ required_error: "Start date is required." }).nullable(),
+  endDate: z.date({ required_error: "End date is required." }).nullable(),
   icon: z.string().optional(),
+}).refine(data => data.startDate && data.endDate && data.endDate >= data.startDate, {
+    message: "End date cannot be before start date.",
+    path: ["endDate"],
 });
 export type NewTripData = z.infer<typeof NewTripSchema>;
 
@@ -93,7 +96,7 @@ export type ExtractedSegment = {
     endLocationShort: string;
     date: string; // YYYY-MM-DD format from AI
     duration?: string;
-    details?: Record<string, string>;
+    details?: any;
 };
 
 

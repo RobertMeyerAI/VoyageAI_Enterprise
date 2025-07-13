@@ -102,8 +102,8 @@ function TripCard({ trip, onCancelNew, onTripAdded }: TripCardProps) {
     resolver: zodResolver(NewTripSchema),
     defaultValues: trip.isNew ? {
         title: '',
-        startDate: undefined,
-        endDate: undefined,
+        startDate: null,
+        endDate: null,
     } : {
       title: trip.title,
       startDate: trip.startDate,
@@ -120,7 +120,7 @@ function TripCard({ trip, onCancelNew, onTripAdded }: TripCardProps) {
           endDate: trip.endDate,
         });
     }
-  }, [trip, form]);
+  }, [trip, form, isEditing]);
 
 
   const handleDelete = async () => {
