@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import Link from 'next/link';
 import { deleteTrip, updateTrip } from '@/lib/data';
 import type { Trip, NewTripData } from '@/lib/types';
@@ -95,6 +95,16 @@ function TripCard({ trip }: { trip: SerializedTrip }) {
       endDate: trip.endDate,
     },
   });
+
+  // Reset form values if the trip prop changes
+  useEffect(() => {
+    form.reset({
+      title: trip.title,
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+    });
+  }, [trip, form]);
+
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -310,12 +320,15 @@ function TripCard({ trip }: { trip: SerializedTrip }) {
 }
 
 export function TripList({ initialTrips }: { initialTrips: SerializedTrip[] }) {
-    // We can manage the list of trips here if needed for dynamic updates
-    // For now, we'll just render the initial list passed as props.
-    // In a more complex scenario, we might use state and effects here.
+    const [trips, setTrips] = useState(initialTrips);
+
+    useEffect(() => {
+        setTrips(initialTrips);
+    }, [initialTrips]);
+
     return (
         <div className="flex flex-col gap-4">
-            {initialTrips.map((trip) => (
+            {trips.map((trip) => (
             <TripCard key={trip.id} trip={trip} />
             ))}
         </div>
