@@ -14,7 +14,10 @@ import { extractSegmentFromEmail } from './extract-segment-from-email-flow';
 import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { v4 as uuidv4 } from 'uuid';
+import { config } from 'dotenv';
 
+// Load environment variables from .env file
+config({ path: '.env' });
 
 const ProcessEmailsOutputSchema = z.object({
   success: z.boolean(),
