@@ -4,8 +4,6 @@ import type { Trip } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
 import * as icons from 'lucide-react';
-import { Timestamp } from 'firebase/firestore';
-import { tripsData as mockTripsData } from '@/lib/mock-data';
 
 function formatDateRange(startDate: Date, endDate: Date) {
   const start = startDate;
@@ -53,17 +51,7 @@ function TripCard({ trip }: { trip: Trip }) {
 }
 
 export default async function ItineraryListPage() {
-  let trips = await getTrips();
-
-  // If Firestore fails, use mock data as a fallback.
-  if (trips.length === 0) {
-    console.log("Using mock data for trips list.");
-    trips = mockTripsData.map(trip => ({
-      ...trip,
-      startDate: Timestamp.fromDate(new Date(trip.startDate)),
-      endDate: Timestamp.fromDate(new Date(trip.endDate)),
-    }));
-  }
+  const trips = await getTrips();
 
   return (
     <div className="flex flex-col gap-8">
