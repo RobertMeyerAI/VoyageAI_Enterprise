@@ -102,8 +102,8 @@ function TripCard({ trip, onCancelNew, onTripAdded }: TripCardProps) {
     resolver: zodResolver(NewTripSchema),
     defaultValues: trip.isNew ? {
         title: '',
-        startDate: null,
-        endDate: null,
+        startDate: new Date('2025-07-01T00:00:00Z'),
+        endDate: new Date('2025-07-31T00:00:00Z'),
     } : {
       title: trip.title,
       startDate: trip.startDate,
