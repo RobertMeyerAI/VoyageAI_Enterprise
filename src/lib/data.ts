@@ -3,7 +3,7 @@
 'use server';
 
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, getDoc, query, orderBy, addDoc, Timestamp, writeBatch, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, query, orderBy, addDoc, Timestamp, writeBatch, deleteDoc, updateDoc } from 'firebase/firestore';
 import type { Trip, Segment, NewTripData, NewSegmentData } from './types';
 import { revalidatePath } from 'next/cache';
 
@@ -22,6 +22,23 @@ export async function addTrip(tripData: NewTripData): Promise<string> {
   } catch (error) {
     console.error('Error adding trip: ', error);
     throw new Error('Failed to create new trip.');
+  }
+}
+
+export async function updateTrip(tripId: string, tripData: NewTripData): Promise<void> {
+  try {
+    const tripDocRef = doc(db, 'trips', tripId);
+    await updateDoc(tripDocRef, {
+      ...tripData,
+      startDate: Timestamp.fromDate(tripData.startDate),
+      endDate: Timestamp.fromDate(tripData.endDate),
+    });
+    console.log(`Trip ${tripId} updated.`);
+    revalidatePath('/itinerary');
+    revalidatePath(`/itinerary/${tripId}`);
+  } catch (error) {
+    console.error('Error updating trip: ', error);
+    throw new Error('Failed to update trip.');
   }
 }
 

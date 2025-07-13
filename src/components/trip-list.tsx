@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { deleteTrip } from '@/lib/data';
-import type { Trip } from '@/lib/types';
+import { deleteTrip, updateTrip } from '@/lib/data';
+import type { Trip, NewTripData } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +13,9 @@ import {
   Trash2,
   Pencil,
   Loader2,
+  X,
+  Check,
+  Calendar as CalendarIcon,
 } from 'lucide-react';
 import * as icons from 'lucide-react';
 import {
@@ -32,13 +35,27 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { NewTripSchema } from '@/lib/types';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
 // The Trip type received here has serialized Date objects
 type SerializedTrip = Omit<Trip, 'startDate' | 'endDate'> & {
   startDate: Date;
   endDate: Date;
 };
-
 
 function formatDateRange(startDate: Date, endDate: Date) {
   const startMonth = startDate.toLocaleDateString('en-US', {
@@ -63,9 +80,21 @@ function TripCard({ trip }: { trip: SerializedTrip }) {
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
   const LucideIcon = trip.icon
     ? (icons[trip.icon as keyof typeof icons] as React.ElementType)
     : icons.Plane;
+
+  const form = useForm<NewTripData>({
+    resolver: zodResolver(NewTripSchema),
+    defaultValues: {
+      title: trip.title,
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+    },
+  });
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -84,8 +113,135 @@ function TripCard({ trip }: { trip: SerializedTrip }) {
       });
       setIsDeleting(false);
     }
-    // No need to set isAlertOpen to false, as the dialog will close on action
   };
+
+  const onUpdateSubmit = (data: NewTripData) => {
+    startTransition(async () => {
+        try {
+            await updateTrip(trip.id, data);
+            toast({
+                title: 'Success!',
+                description: `Trip "${data.title}" has been updated.`,
+            });
+            setIsEditing(false);
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: 'Uh oh! Something went wrong.',
+                description: 'There was a problem updating your trip.',
+            });
+        }
+    });
+  };
+
+  if (isEditing) {
+    return (
+        <Card className="p-4">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onUpdateSubmit)} className="space-y-4">
+                    <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel className="sr-only">Title</FormLabel>
+                            <FormControl>
+                                <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <div className='flex gap-2'>
+                        <FormField
+                            control={form.control}
+                            name="startDate"
+                            render={({ field }) => (
+                                <FormItem className="flex-1">
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full pl-3 text-left font-normal",
+                                            !field.value && "text-muted-foreground"
+                                        )}
+                                        >
+                                        {field.value ? (
+                                            format(field.value, "PPP")
+                                        ) : (
+                                            <span>Pick a date</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                    </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                        mode="single"
+                                        selected={field.value}
+                                        onSelect={field.onChange}
+                                        initialFocus
+                                    />
+                                    </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="endDate"
+                            render={({ field }) => (
+                                <FormItem className="flex-1">
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full pl-3 text-left font-normal",
+                                            !field.value && "text-muted-foreground"
+                                        )}
+                                        >
+                                        {field.value ? (
+                                            format(field.value, "PPP")
+                                        ) : (
+                                            <span>Pick a date</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                    </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                        mode="single"
+                                        selected={field.value}
+                                        onSelect={field.onChange}
+                                        initialFocus
+                                    />
+                                    </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                        <Button type="button" variant="ghost" size="sm" onClick={() => setIsEditing(false)}>
+                            <X className="mr-2 h-4 w-4" /> Cancel
+                        </Button>
+                        <Button type="submit" size="sm" disabled={isPending}>
+                            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                            Save
+                        </Button>
+                    </div>
+                </form>
+            </Form>
+        </Card>
+    )
+  }
 
   return (
     <Card className="flex items-center p-2 transition-all hover:bg-secondary/50">
@@ -112,7 +268,7 @@ function TripCard({ trip }: { trip: SerializedTrip }) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setIsEditing(true)}>
               <Pencil className="mr-2 h-4 w-4" />
               <span>Edit</span>
             </DropdownMenuItem>
