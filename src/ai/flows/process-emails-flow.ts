@@ -10,6 +10,11 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { google } from 'googleapis';
+import { extractSegmentFromEmail } from './extract-segment-from-email-flow';
+import { doc, setDoc, Timestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { v4 as uuidv4 } from 'uuid';
+
 
 const ProcessEmailsOutputSchema = z.object({
   success: z.boolean(),
@@ -48,7 +53,7 @@ const processEmailsFlow = ai.defineFlow(
       const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
       
       const res = await gmail.users.messages.list({
-        userId: magicMailboxEmail,
+        userId: 'me', // 'me' refers to the authenticated user's mailbox
         q: 'is:unread', // Fetch only unread emails
       });
 
@@ -59,29 +64,55 @@ const processEmailsFlow = ai.defineFlow(
       }
 
       console.log(`Found ${messages.length} new emails. Processing...`);
+      let processedCount = 0;
 
       for (const message of messages) {
         if (!message.id) continue;
         
         const msg = await gmail.users.messages.get({
-          userId: magicMailboxEmail,
+          userId: 'me',
           id: message.id,
-          format: 'full', // We want the full email payload
+          format: 'full',
         });
 
-        // The email body is typically in the payload.parts array, base64 encoded.
-        // This is a simplified extraction. A robust implementation would handle multipart messages.
-        const emailBody = msg.data.payload?.parts?.find(part => part.mimeType === 'text/plain')?.body?.data;
+        // Find the plain text part of the email
+        let emailBody = '';
+        const parts = msg.data.payload?.parts;
+        if (parts) {
+            const part = parts.find(p => p.mimeType === 'text/plain' && p.body?.data);
+            if (part && part.body?.data) {
+                emailBody = Buffer.from(part.body.data, 'base64').toString('utf-8');
+            }
+        }
+        
         if (emailBody) {
-            const decodedBody = Buffer.from(emailBody, 'base64').toString('utf-8');
-            console.log('--- Email Body ---');
-            console.log(decodedBody.substring(0, 300) + '...'); // Log first 300 chars
-            // TODO: Pass the decodedBody to another Genkit flow for parsing and saving to Firestore.
+            console.log(`--- Parsing Email ID: ${message.id} ---`);
+            const extractionResult = await extractSegmentFromEmail({ emailBody });
+            
+            if (extractionResult.isTravelEmail && extractionResult.segment) {
+                console.log(`Extracted segment: ${extractionResult.segment.title}`);
+                const newSegment = {
+                    ...extractionResult.segment,
+                    date: Timestamp.fromDate(new Date(extractionResult.segment.date)),
+                }
+
+                // TODO: The tripId should be determined dynamically, e.g., from the user context
+                // or by matching details in the email. Hardcoding for now.
+                const tripId = 'scandinavia-2025';
+                const segmentId = uuidv4();
+                const segmentDocRef = doc(db, 'trips', tripId, 'segments', segmentId);
+                await setDoc(segmentDocRef, newSegment);
+                
+                console.log(`Saved segment ${segmentId} to trip ${tripId}`);
+                processedCount++;
+            } else {
+                console.log('Email was not a travel reservation. Skipping.');
+            }
         }
 
         // Mark the email as read after processing
         await gmail.users.messages.modify({
-            userId: magicMailboxEmail,
+            userId: 'me',
             id: message.id,
             requestBody: {
                 removeLabelIds: ['UNREAD']
@@ -91,7 +122,7 @@ const processEmailsFlow = ai.defineFlow(
 
       return {
         success: true,
-        message: `Email sync complete. ${messages.length} new email(s) processed.`,
+        message: `Email sync complete. ${messages.length} email(s) checked, ${processedCount} new segment(s) added.`,
       };
 
     } catch (error: any) {
