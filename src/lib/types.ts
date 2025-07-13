@@ -19,6 +19,10 @@ export type Segment = {
   media?: { type: 'qr' | 'pdf'; url: string }[];
 };
 
+// This version of Segment is specifically for the mock data structure
+export type MockSegment = Omit<Segment, 'date'>;
+
+
 export type DayGroup = {
   date: string;
   day: string;
@@ -33,7 +37,7 @@ export type Trip = {
   icon: string;
 };
 
-// Original trip type from mock data for seeding
+// Trip type for mock data for seeding and fallback
 export type MockTrip = {
   id: string;
   title: string;
@@ -43,7 +47,7 @@ export type MockTrip = {
   itinerary: {
     date: string;
     day: string;
-    segments: Omit<Segment, 'date'>[];
+    segments: MockSegment[];
   }[];
 }
 

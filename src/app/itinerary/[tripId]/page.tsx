@@ -1,17 +1,39 @@
 import { notFound } from 'next/navigation';
-import { SegmentCard } from '@/components/segment-card';
-import type { DayGroup, Segment } from '@/lib/types';
+import type { DayGroup } from '@/lib/types';
 import ItineraryLoading from '../loading';
 import { getTrip, getTripSegments } from '@/lib/data';
 import { ItineraryView } from '@/components/itinerary-view';
+import { tripsData as mockTripsData } from '@/lib/mock-data';
+import { Timestamp } from 'firebase/firestore';
 
 export default async function ItineraryPage({
   params,
 }: {
   params: { tripId: string };
 }) {
-  const trip = await getTrip(params.tripId);
-  const segments = await getTripSegments(params.tripId);
+  let trip = await getTrip(params.tripId);
+  let segments = await getTripSegments(params.tripId);
+
+  // Fallback to mock data if Firestore fails
+  if (!trip || segments.length === 0) {
+    console.log(`Using mock data for trip: ${params.tripId}`);
+    const mockTrip = mockTripsData.find(t => t.id === params.tripId);
+    if (mockTrip) {
+      trip = {
+        id: mockTrip.id,
+        title: mockTrip.title,
+        icon: mockTrip.icon,
+        startDate: Timestamp.fromDate(new Date(mockTrip.startDate)),
+        endDate: Timestamp.fromDate(new Date(mockTrip.endDate)),
+      };
+      segments = mockTrip.itinerary.flatMap(day => 
+        day.segments.map(seg => ({
+          ...seg,
+          date: Timestamp.fromDate(new Date(day.date))
+        }))
+      );
+    }
+  }
 
   if (!trip) {
     notFound();
@@ -35,6 +57,10 @@ export default async function ItineraryPage({
     dayGroup.segments.push(segment);
     return acc;
   }, []);
+
+  // Sort day groups by date
+  dayGroups.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
 
   return <ItineraryView trip={trip} initialItinerary={dayGroups} />;
 }
