@@ -3,6 +3,7 @@ import type { DayGroup, SerializedTrip, SerializedSegment } from '@/lib/types';
 import ItineraryLoading from '../loading';
 import { getTrip, getTripSegments } from '@/lib/data';
 import { ItineraryView } from '@/components/itinerary-view';
+import { NewSegmentForm } from '@/components/new-segment-form';
 
 export default async function ItineraryPage({
   params,

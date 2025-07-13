@@ -2,8 +2,10 @@ import Link from 'next/link';
 import { getTrips } from '@/lib/data';
 import type { Trip } from '@/lib/types';
 import { Card } from '@/components/ui/card';
-import { Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Calendar, PlusCircle } from 'lucide-react';
 import * as icons from 'lucide-react';
+import { NewTripForm } from '@/components/new-trip-form';
 
 function formatDateRange(startDate: Date, endDate: Date) {
   const start = startDate;
@@ -28,7 +30,7 @@ function formatDateRange(startDate: Date, endDate: Date) {
 }
 
 function TripCard({ trip }: { trip: Trip }) {
-  const LucideIcon = icons[trip.icon as keyof typeof icons] as React.ElementType;
+  const LucideIcon = trip.icon ? (icons[trip.icon as keyof typeof icons] as React.ElementType) : Plane;
 
   return (
     <Link href={`/itinerary/${trip.id}`} className="group">
@@ -55,13 +57,16 @@ export default async function ItineraryListPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <header>
-        <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
-          My Trips
-        </h1>
-        <p className="text-muted-foreground">
-          Your upcoming adventures, all in one place.
-        </p>
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
+            My Trips
+          </h1>
+          <p className="text-muted-foreground">
+            Your upcoming adventures, all in one place.
+          </p>
+        </div>
+        <NewTripForm />
       </header>
       <div className="flex flex-col gap-4">
         {trips.map(trip => (

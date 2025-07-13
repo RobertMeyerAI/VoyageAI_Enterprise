@@ -4,6 +4,7 @@ import { SegmentCard } from '@/components/segment-card';
 import type { DayGroup, SerializedSegment, SerializedTrip } from '@/lib/types';
 import ItineraryLoading from '@/app/itinerary/loading';
 import { getLiveItineraryStatus } from '@/ai/flows/get-live-itinerary-status';
+import { NewSegmentForm } from './new-segment-form';
 
 interface ItineraryViewProps {
   trip: SerializedTrip;
@@ -67,13 +68,16 @@ export function ItineraryView({ trip, initialItinerary }: ItineraryViewProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      <header>
-        <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
-          {trip.title}
-        </h1>
-        <p className="text-muted-foreground">
-          Your unified timeline of all reservations for this trip.
-        </p>
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
+            {trip.title}
+            </h1>
+            <p className="text-muted-foreground">
+            Your unified timeline of all reservations for this trip.
+            </p>
+        </div>
+        <NewSegmentForm tripId={trip.id} />
       </header>
       {itinerary.map((dayGroup) => (
         <div key={dayGroup.date} className="flex flex-col gap-4">

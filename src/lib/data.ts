@@ -1,8 +1,44 @@
 'use server';
 
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, getDoc, query, orderBy } from 'firebase/firestore';
-import type { Trip, Segment } from './types';
+import { collection, getDocs, doc, getDoc, query, orderBy, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import type { Trip, Segment, NewTripData, NewSegmentData } from './types';
+import { revalidatePath } from 'next/cache';
+
+export async function addTrip(tripData: NewTripData): Promise<string> {
+  try {
+    const tripsCol = collection(db, 'trips');
+    const docRef = await addDoc(tripsCol, {
+      ...tripData,
+      startDate: Timestamp.fromDate(new Date(tripData.startDate)),
+      endDate: Timestamp.fromDate(new Date(tripData.endDate)),
+      icon: 'Plane', // Default icon
+    });
+    console.log('Trip added with ID: ', docRef.id);
+    revalidatePath('/itinerary');
+    return docRef.id;
+  } catch (error) {
+    console.error('Error adding trip: ', error);
+    throw new Error('Failed to create new trip.');
+  }
+}
+
+export async function addSegment(tripId: string, segmentData: NewSegmentData): Promise<string> {
+    try {
+        const segmentsCol = collection(db, `trips/${tripId}/segments`);
+        const docRef = await addDoc(segmentsCol, {
+            ...segmentData,
+            date: Timestamp.fromDate(new Date(segmentData.date)),
+        });
+        console.log(`Segment added with ID: ${docRef.id} to trip ${tripId}`);
+        revalidatePath(`/itinerary/${tripId}`);
+        return docRef.id;
+    } catch (error) {
+        console.error('Error adding segment: ', error);
+        throw new Error('Failed to create new segment.');
+    }
+}
+
 
 export async function getTrips(): Promise<Trip[]> {
   try {

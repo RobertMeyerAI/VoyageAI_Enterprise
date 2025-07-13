@@ -1,4 +1,5 @@
 import type { Timestamp } from 'firebase/firestore';
+import { z } from 'zod';
 
 export type Segment = {
   id: string;
@@ -40,7 +41,7 @@ export type Trip = {
   title: string;
   startDate: Timestamp;
   endDate: Timestamp;
-  icon: string;
+  icon?: string;
 };
 
 // Type for when a Trip has been serialized for a Client Component
@@ -48,6 +49,31 @@ export type SerializedTrip = Omit<Trip, 'startDate' | 'endDate'> & {
   startDate: string;
   endDate: string;
 };
+
+// Data for creating a new Trip
+export const NewTripSchema = z.object({
+  title: z.string().min(1, "Title is required."),
+  startDate: z.string().min(1, "Start date is required."),
+  endDate: z.string().min(1, "End date is required."),
+});
+export type NewTripData = z.infer<typeof NewTripSchema>;
+
+// Data for creating a new Segment
+export const NewSegmentSchema = z.object({
+  type: z.enum(['flight', 'lodging', 'train', 'ferry', 'bus', 'activity', 'car']),
+  status: z.enum(['confirmed', 'delayed', 'cancelled']),
+  title: z.string().min(1, "Title is required."),
+  provider: z.string().min(1, "Provider is required."),
+  confirmationCode: z.string(),
+  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)."),
+  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)."),
+  startLocation: z.string().min(1, "Start location is required."),
+  endLocation: z.string().min(1, "End location is required."),
+  startLocationShort: z.string().min(1, "Short start location is required."),
+  endLocationShort: z.string().min(1, "Short end location is required."),
+  date: z.string().min(1, "Date is required."),
+});
+export type NewSegmentData = z.infer<typeof NewSegmentSchema>;
 
 
 // Trip type for mock data for seeding and fallback
