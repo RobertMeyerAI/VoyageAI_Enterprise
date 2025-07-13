@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "genkit:dev": "genkit start --port 3500",
-    "genkit:watch": "genkit start --port 3500 --no-ui --watch",
+    "genkit:watch": "genkit start --port 3500 --no-ui",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
