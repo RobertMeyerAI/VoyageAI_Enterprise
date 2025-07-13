@@ -46,11 +46,11 @@ function formatDateRange(startDate: Date, endDate: Date) {
     timeZone: 'UTC',
   });
   const startDay = startDate.getUTCDate();
-  const endMonth = end.toLocaleDateString('en-US', {
+  const endMonth = endDate.toLocaleDateString('en-US', {
     month: 'short',
     timeZone: 'UTC',
   });
-  const endDay = end.getUTCDate();
+  const endDay = endDate.getUTCDate();
 
   if (startMonth === endMonth) {
     return `${startMonth} ${startDay} - ${endDay}`;
