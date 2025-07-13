@@ -1,12 +1,21 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // This rule allows anyone to read and write to the database.
-    // This is insecure and should only be used for initial development and debugging.
+    // Allow reading the list of trips and individual trips
+    match /trips/{tripId} {
+      allow get, list: if true;
+
+      // Allow reading segments for a specific trip
+      match /segments/{segmentId} {
+        allow get, list: if true;
+      }
+    }
+
+    // A general rule to allow writes for seeding, but this can be tightened later.
+    // The main issue seems to be with reads, so we focus on that.
     match /{document=**} {
-      allow read, write: if true;
+        allow write: if true;
     }
   }
 }
