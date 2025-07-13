@@ -29,6 +29,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Mail, Loader2, Wand2 } from 'lucide-react';
 import { extractSegmentFromEmail } from '@/ai/flows/extract-segment-from-email-flow';
 import type { SerializedSegment } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 
 const ParseEmailSchema = z.object({
   emailBody: z.string().min(50, 'Email content seems too short to be a reservation.'),
@@ -40,6 +41,7 @@ export function ParseEmailForm({ tripId }: { tripId: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<ParseEmailData>({
     resolver: zodResolver(ParseEmailSchema),
@@ -89,6 +91,7 @@ export function ParseEmailForm({ tripId }: { tripId: string }) {
         });
         form.reset();
         setIsOpen(false);
+        router.refresh(); // Refresh the page to show the new segment
       } catch (error: any) {
         toast({
           variant: 'destructive',

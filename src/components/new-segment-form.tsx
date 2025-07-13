@@ -38,11 +38,13 @@ import { Calendar } from '@/components/ui/calendar';
 import { Calendar as CalendarIcon, PlusCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 export function NewSegmentForm({ tripId }: { tripId: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<NewSegmentData>({
     resolver: zodResolver(NewSegmentSchema),
@@ -72,6 +74,7 @@ export function NewSegmentForm({ tripId }: { tripId: string }) {
         });
         form.reset();
         setIsOpen(false);
+        router.refresh(); // Refresh the page to show the new segment
       } catch (error) {
         toast({
           variant: 'destructive',
