@@ -25,7 +25,7 @@ const SegmentSchemaForAI = z.object({
   endLocationShort: z.string(),
   date: z.string().describe("The date of the segment in ISO 8601 format."),
   duration: z.string().optional(),
-  details: z.record(z.string()).optional(),
+  details: z.string().optional().describe("A single string summarizing all key details like Gate, Seat, Terminal, etc."),
   media: z.array(z.object({ type: z.enum(['qr', 'pdf']), url: z.string() })).optional(),
 });
 
@@ -50,7 +50,10 @@ const prompt = ai.definePrompt({
   output: {schema: GetLiveItineraryStatusOutputSchema},
   prompt: `You are a live travel assistant AI named Voyage AI. Your task is to check the real-time status of a user's itinerary. You have access to live flight tracking, train schedules, and other travel data sources.
 
-Review the following itinerary segments. For each one, update its 'status' field to reflect the most current, real-time information. If a segment is delayed, update its 'details' to include the new estimated time and 'title' to reflect the delay. If it's on time, change the status to 'confirmed' but you can add a detail like 'On Time'. Do not change any other fields unless necessary to reflect the new status.
+Review the following itinerary segments. For each one, update its 'status' field to reflect the most current, real-time information. 
+If a segment is delayed, update its 'title' to reflect the delay. If it's on time, you can add a detail like 'On Time'.
+Combine all relevant details (like Gate, Seat, New Departure Time, etc.) into a single summary string for the 'details' field.
+Do not change any other fields unless necessary to reflect the new status.
 
 Itinerary:
 {{{json segments}}}
