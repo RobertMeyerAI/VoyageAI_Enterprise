@@ -12,9 +12,10 @@ export async function addTrip(tripData: NewTripData): Promise<string> {
   try {
     const tripsCol = collection(db, 'trips');
     const docRef = await addDoc(tripsCol, {
-      ...tripData,
-      startDate: Timestamp.fromDate(tripData.startDate),
-      endDate: Timestamp.fromDate(tripData.endDate),
+      title: tripData.title,
+      // Default dates if not provided, for simplicity
+      startDate: Timestamp.fromDate(tripData.startDate ?? new Date('2025-07-01T00:00:00Z')),
+      endDate: Timestamp.fromDate(tripData.endDate ?? new Date('2025-07-31T00:00:00Z')),
       icon: 'Plane', // Default icon
     });
     console.log('Trip added with ID: ', docRef.id);
@@ -28,6 +29,9 @@ export async function addTrip(tripData: NewTripData): Promise<string> {
 
 export async function updateTrip(tripId: string, tripData: NewTripData): Promise<void> {
   try {
+    if (!tripData.startDate || !tripData.endDate) {
+        throw new Error("Start and end dates are required for updating a trip.");
+    }
     const tripDocRef = doc(db, 'trips', tripId);
     await updateDoc(tripDocRef, {
       ...tripData,
@@ -71,13 +75,18 @@ export async function deleteTrip(tripId: string): Promise<void> {
 }
 
 
-export async function addSegment(tripId: string, segmentData: NewSegmentData): Promise<string> {
+export async function addSegment(tripId: string, segmentData: NewSegmentData & { date: Date }): Promise<string> {
     try {
         const segmentsCol = collection(db, `trips/${tripId}/segments`);
-        const docRef = await addDoc(segmentsCol, {
+        
+        // The date is already validated as a non-null Date object by the form.
+        // We can safely create the Timestamp.
+        const dataToSave = {
             ...segmentData,
             date: Timestamp.fromDate(segmentData.date),
-        });
+        };
+
+        const docRef = await addDoc(segmentsCol, dataToSave);
         console.log(`Segment added with ID: ${docRef.id} to trip ${tripId}`);
         revalidatePath(`/itinerary/${tripId}`);
         return docRef.id;
