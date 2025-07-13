@@ -10,8 +10,10 @@ export default async function ItineraryPage({
 }: {
   params: { tripId: string };
 }) {
-  const trip = await getTrip(params.tripId);
-  const segments = await getTripSegments(params.tripId);
+  const [trip, segments] = await Promise.all([
+    getTrip(params.tripId),
+    getTripSegments(params.tripId)
+  ]);
 
   if (!trip) {
     notFound();
