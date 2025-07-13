@@ -7,6 +7,13 @@ import type { Trip } from '@/lib/types';
 export default async function ItineraryListPage() {
   const trips: Trip[] = await getTrips();
 
+  // Serialize Timestamps to Date objects before passing to the client component.
+  const serializedTrips = trips.map(trip => ({
+    ...trip,
+    startDate: trip.startDate.toDate(),
+    endDate: trip.endDate.toDate(),
+  }));
+
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -20,7 +27,7 @@ export default async function ItineraryListPage() {
         </div>
         <NewTripForm />
       </header>
-      <TripList initialTrips={trips} />
+      <TripList initialTrips={serializedTrips} />
     </div>
   );
 }

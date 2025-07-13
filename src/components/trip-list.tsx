@@ -33,15 +33,19 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 
-function formatDateRange(startDate: Date, endDate: Date) {
-  const start = startDate;
-  const end = endDate;
+// The Trip type received here has serialized Date objects
+type SerializedTrip = Omit<Trip, 'startDate' | 'endDate'> & {
+  startDate: Date;
+  endDate: Date;
+};
 
-  const startMonth = start.toLocaleDateString('en-US', {
+
+function formatDateRange(startDate: Date, endDate: Date) {
+  const startMonth = startDate.toLocaleDateString('en-US', {
     month: 'short',
     timeZone: 'UTC',
   });
-  const startDay = start.getUTCDate();
+  const startDay = startDate.getUTCDate();
   const endMonth = end.toLocaleDateString('en-US', {
     month: 'short',
     timeZone: 'UTC',
@@ -55,7 +59,7 @@ function formatDateRange(startDate: Date, endDate: Date) {
   }
 }
 
-function TripCard({ trip }: { trip: Trip }) {
+function TripCard({ trip }: { trip: SerializedTrip }) {
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -94,7 +98,7 @@ function TripCard({ trip }: { trip: Trip }) {
           <div className="text-sm text-muted-foreground mt-1 flex items-center">
             <Calendar className="mr-1.5 h-4 w-4" />
             <span>
-              {formatDateRange(trip.startDate.toDate(), trip.endDate.toDate())}
+              {formatDateRange(trip.startDate, trip.endDate)}
             </span>
           </div>
         </div>
@@ -149,7 +153,7 @@ function TripCard({ trip }: { trip: Trip }) {
   );
 }
 
-export function TripList({ initialTrips }: { initialTrips: Trip[] }) {
+export function TripList({ initialTrips }: { initialTrips: SerializedTrip[] }) {
     // We can manage the list of trips here if needed for dynamic updates
     // For now, we'll just render the initial list passed as props.
     // In a more complex scenario, we might use state and effects here.
