@@ -1,10 +1,9 @@
 
 
-
 'use server';
 
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, getDoc, query, orderBy, addDoc, Timestamp, writeBatch, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, query, orderBy, addDoc, Timestamp, writeBatch, deleteDoc, updateDoc, setDoc } from 'firebase/firestore';
 import type { Trip, Segment, NewTripData, NewSegmentData, ExtractedSegment } from './types';
 import { revalidatePath } from 'next/cache';
 import { v4 as uuidv4 } from 'uuid';
@@ -90,8 +89,6 @@ export async function addSegment(tripId: string, segmentData: NewSegmentData): P
 
 export async function addSegmentFromEmail(tripId: string, segmentData: ExtractedSegment): Promise<string> {
     try {
-        const segmentsCol = collection(db, `trips/${tripId}/segments`);
-        
         // Convert date string from AI to Firestore Timestamp
         // The AI returns YYYY-MM-DD, which is safe to parse in UTC.
         const segmentDate = new Date(segmentData.date + 'T00:00:00Z');
