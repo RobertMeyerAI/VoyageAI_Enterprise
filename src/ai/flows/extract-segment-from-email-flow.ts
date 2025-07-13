@@ -29,7 +29,17 @@ const ExtractedSegmentSchema = z.object({
     endLocationShort: z.string().describe("A short code for the end location (e.g., airport code 'CPH')."),
     date: z.string().describe("The primary date of the segment in YYYY-MM-DD format."),
     duration: z.string().optional().describe("The duration of the travel segment, if available."),
-    details: z.any().optional().describe("An object for additional details like Gate, Seat, Terminal, etc."),
+    details: z.object({
+        Gate: z.string().optional().describe("Departure gate for a flight."),
+        Seat: z.string().optional().describe("Seat number."),
+        Terminal: z.string().optional().describe("Airport terminal."),
+        Platform: z.string().optional().describe("Train platform."),
+        Coach: z.string().optional().describe("Train coach or car number."),
+        Cabin: z.string().optional().describe("Ferry or cruise cabin number."),
+        Deck: z.string().optional().describe("Ferry or cruise deck number."),
+        "Room Type": z.string().optional().describe("Type of room for lodging."),
+        "Booked Via": z.string().optional().describe("The booking service used, if any (e.g., Booking.com, Expedia)."),
+    }).optional().describe("An object for all additional details. Extract as many as you can find."),
 });
 
 
@@ -79,7 +89,7 @@ const prompt = ai.definePrompt({
 
 If it is a travel reservation (flight, hotel, train, etc.), first check if it is a duplicate of an existing reservation provided in the 'existingSegments' list. Use deep reasoning: a duplicate could be an email for the same booking (e.g., same confirmation code) or a conflicting booking (e.g., same flight number and date but different time, which might be an update).
 
-If it is a duplicate, set 'isDuplicate' to true. Otherwise, extract all the relevant details and return them in a structured format.
+If it is a duplicate, set 'isDuplicate' to true. Otherwise, extract ALL the relevant details and return them in a structured format. Be as thorough as possible, filling in all fields in the 'details' object if the information is available in the email (Gate, Seat, Terminal, Room Type, etc.).
 If it is not a travel-related email, or if it is a marketing email or a newsletter, indicate that it is not a travel email.
 
 Today's date is ${new Date().toLocaleDateString('en-CA')}. Use this to resolve relative dates if necessary.
