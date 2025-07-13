@@ -20,9 +20,10 @@ if (!clientId || !clientSecret) {
 }
 
 // IMPORTANT: This script runs a local server to capture the OAuth callback.
-// You MUST add `http://localhost:3000/oauth2callback` as an "Authorized redirect URI"
+// You MUST add the following URL as an "Authorized redirect URI"
 // in your Google Cloud Console's OAuth 2.0 Client ID settings for this script to work.
-const REDIRECT_URI = 'http://localhost:3000/oauth2callback';
+// https://3000-dot-80-firebase-studio-1752337530269.cluster-aj77uug3sjd4iut4ev6a4jbtf2.cloudworkstations.dev/oauth2callback
+const REDIRECT_URI = 'https://3000-dot-80-firebase-studio-1752337530269.cluster-aj77uug3sjd4iut4ev6a4jbtf2.cloudworkstations.dev/oauth2callback';
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 
 const oauth2Client = new google.auth.OAuth2(
@@ -90,6 +91,7 @@ async function getRefreshToken() {
     }
   }).listen(3000, () => {
     console.log('\nWaiting for authorization... a local server is running on http://localhost:3000');
+    console.log(`Ensure your redirect URI in Google Cloud Console is set to: ${REDIRECT_URI}`);
   });
 }
 
