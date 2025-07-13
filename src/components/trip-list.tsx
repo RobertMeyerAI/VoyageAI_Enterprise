@@ -231,7 +231,6 @@ function TripCard({ trip, onCancelNew, onTripAdded }: TripCardProps) {
                                         mode="single"
                                         selected={field.value}
                                         onSelect={field.onChange}
-                                        initialFocus
                                     />
                                     </PopoverContent>
                                 </Popover>
@@ -268,7 +267,6 @@ function TripCard({ trip, onCancelNew, onTripAdded }: TripCardProps) {
                                         mode="single"
                                         selected={field.value}
                                         onSelect={field.onChange}
-                                        initialFocus
                                     />
                                     </PopoverContent>
                                 </Popover>
