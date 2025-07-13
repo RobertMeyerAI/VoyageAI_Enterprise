@@ -3,7 +3,7 @@
 
 import { useState, useTransition, useEffect } from 'react';
 import Link from 'next/link';
-import { deleteTrip, updateTrip } from '@/lib/data';
+import { deleteTrip, updateTrip, addTrip } from '@/lib/data';
 import type { Trip, NewTripData } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import {
   X,
   Check,
   Calendar as CalendarIcon,
+  PlusCircle,
 } from 'lucide-react';
 import * as icons from 'lucide-react';
 import {
@@ -57,6 +58,10 @@ type SerializedTrip = Omit<Trip, 'startDate' | 'endDate'> & {
   endDate: Date;
 };
 
+// We add an optional isNew flag for the inline creation form
+type DisplayTrip = SerializedTrip & { isNew?: boolean };
+
+
 function formatDateRange(startDate: Date, endDate: Date) {
   const startMonth = startDate.toLocaleDateString('en-US', {
     month: 'short',
@@ -76,11 +81,17 @@ function formatDateRange(startDate: Date, endDate: Date) {
   }
 }
 
-function TripCard({ trip }: { trip: SerializedTrip }) {
+interface TripCardProps {
+  trip: DisplayTrip;
+  onCancelNew?: () => void;
+  onTripAdded?: () => void;
+}
+
+function TripCard({ trip, onCancelNew, onTripAdded }: TripCardProps) {
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(trip.isNew || false);
   const [isPending, startTransition] = useTransition();
 
   const LucideIcon = trip.icon
@@ -89,20 +100,26 @@ function TripCard({ trip }: { trip: SerializedTrip }) {
 
   const form = useForm<NewTripData>({
     resolver: zodResolver(NewTripSchema),
-    defaultValues: {
+    defaultValues: trip.isNew ? {
+        title: '',
+        startDate: undefined,
+        endDate: undefined,
+    } : {
       title: trip.title,
       startDate: trip.startDate,
       endDate: trip.endDate,
     },
   });
 
-  // Reset form values if the trip prop changes
+  // Reset form values if the trip prop changes, but only if not editing a new trip
   useEffect(() => {
-    form.reset({
-      title: trip.title,
-      startDate: trip.startDate,
-      endDate: trip.endDate,
-    });
+    if (!trip.isNew) {
+        form.reset({
+          title: trip.title,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+        });
+    }
   }, [trip, form]);
 
 
@@ -125,30 +142,52 @@ function TripCard({ trip }: { trip: SerializedTrip }) {
     }
   };
 
-  const onUpdateSubmit = (data: NewTripData) => {
+  const handleFormSubmit = (data: NewTripData) => {
     startTransition(async () => {
         try {
-            await updateTrip(trip.id, data);
-            toast({
-                title: 'Success!',
-                description: `Trip "${data.title}" has been updated.`,
-            });
-            setIsEditing(false);
+            if (trip.isNew) {
+                await addTrip(data);
+                toast({
+                    title: 'Success!',
+                    description: `Trip "${data.title}" has been created.`,
+                });
+                onTripAdded?.();
+            } else {
+                await updateTrip(trip.id, data);
+                toast({
+                    title: 'Success!',
+                    description: `Trip "${data.title}" has been updated.`,
+                });
+                setIsEditing(false);
+            }
         } catch (error) {
             toast({
                 variant: 'destructive',
                 title: 'Uh oh! Something went wrong.',
-                description: 'There was a problem updating your trip.',
+                description: trip.isNew ? 'There was a problem creating your trip.' : 'There was a problem updating your trip.',
             });
         }
     });
   };
 
+  const handleCancel = () => {
+    if (trip.isNew) {
+        onCancelNew?.();
+    } else {
+        setIsEditing(false);
+        form.reset({ // Reset form to original values
+            title: trip.title,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+        });
+    }
+  }
+
   if (isEditing) {
     return (
         <Card className="p-4">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onUpdateSubmit)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
                     <FormField
                         control={form.control}
                         name="title"
@@ -156,7 +195,7 @@ function TripCard({ trip }: { trip: SerializedTrip }) {
                             <FormItem>
                             <FormLabel className="sr-only">Title</FormLabel>
                             <FormControl>
-                                <Input {...field} />
+                                <Input {...field} placeholder="e.g., Summer in Scandinavia" />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
@@ -181,7 +220,7 @@ function TripCard({ trip }: { trip: SerializedTrip }) {
                                         {field.value ? (
                                             format(field.value, "PPP")
                                         ) : (
-                                            <span>Pick a date</span>
+                                            <span>Pick a start date</span>
                                         )}
                                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                         </Button>
@@ -218,7 +257,7 @@ function TripCard({ trip }: { trip: SerializedTrip }) {
                                         {field.value ? (
                                             format(field.value, "PPP")
                                         ) : (
-                                            <span>Pick a date</span>
+                                            <span>Pick an end date</span>
                                         )}
                                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                         </Button>
@@ -239,7 +278,7 @@ function TripCard({ trip }: { trip: SerializedTrip }) {
                         />
                     </div>
                     <div className="flex justify-end gap-2">
-                        <Button type="button" variant="ghost" size="sm" onClick={() => setIsEditing(false)}>
+                        <Button type="button" variant="ghost" size="sm" onClick={handleCancel}>
                             <X className="mr-2 h-4 w-4" /> Cancel
                         </Button>
                         <Button type="submit" size="sm" disabled={isPending}>
@@ -320,17 +359,51 @@ function TripCard({ trip }: { trip: SerializedTrip }) {
 }
 
 export function TripList({ initialTrips }: { initialTrips: SerializedTrip[] }) {
-    const [trips, setTrips] = useState(initialTrips);
+    const [trips, setTrips] = useState<DisplayTrip[]>(initialTrips);
+    const [isAdding, setIsAdding] = useState(false);
 
     useEffect(() => {
-        setTrips(initialTrips);
-    }, [initialTrips]);
+        // Only update if not currently adding a new trip
+        if (!isAdding) {
+            setTrips(initialTrips);
+        }
+    }, [initialTrips, isAdding]);
+
+    const handleAddNew = () => {
+        setIsAdding(true);
+    };
+    
+    const handleCancelNew = () => {
+        setIsAdding(false);
+    }
+    
+    const handleTripAdded = () => {
+        setIsAdding(false);
+        // Revalidation should handle refetching, but we can clear the local state
+        // to be sure we get the fresh list.
+    }
 
     return (
         <div className="flex flex-col gap-4">
             {trips.map((trip) => (
-            <TripCard key={trip.id} trip={trip} />
+                <TripCard key={trip.id} trip={trip} />
             ))}
+            {isAdding && (
+                <TripCard 
+                    trip={{ id: 'new', title: '', startDate: new Date(), endDate: new Date(), isNew: true }} 
+                    onCancelNew={handleCancelNew}
+                    onTripAdded={handleTripAdded}
+                />
+            )}
+             <Button 
+                variant="outline" 
+                className="mt-2 w-full border-dashed" 
+                onClick={handleAddNew}
+                disabled={isAdding}
+            >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add New Trip
+            </Button>
         </div>
     );
 }

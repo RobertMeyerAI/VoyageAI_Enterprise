@@ -1,6 +1,5 @@
 
 import { getTrips } from '@/lib/data';
-import { NewTripForm } from '@/components/new-trip-form';
 import { TripList } from '@/components/trip-list';
 import type { Trip } from '@/lib/types';
 
@@ -25,7 +24,6 @@ export default async function ItineraryListPage() {
             Your upcoming adventures, all in one place.
           </p>
         </div>
-        <NewTripForm />
       </header>
       <TripList initialTrips={serializedTrips} />
     </div>
