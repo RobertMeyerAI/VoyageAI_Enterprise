@@ -19,6 +19,12 @@ export type Segment = {
   media?: { type: 'qr' | 'pdf'; url: string }[];
 };
 
+// Type for when a Segment has been serialized for a Client Component
+export type SerializedSegment = Omit<Segment, 'date'> & {
+  date: string;
+};
+
+
 // This version of Segment is specifically for the mock data structure
 export type MockSegment = Omit<Segment, 'date'>;
 
@@ -26,7 +32,7 @@ export type MockSegment = Omit<Segment, 'date'>;
 export type DayGroup = {
   date: string;
   day: string;
-  segments: Segment[];
+  segments: SerializedSegment[];
 };
 
 export type Trip = {
@@ -36,6 +42,13 @@ export type Trip = {
   endDate: Timestamp;
   icon: string;
 };
+
+// Type for when a Trip has been serialized for a Client Component
+export type SerializedTrip = Omit<Trip, 'startDate' | 'endDate'> & {
+  startDate: string;
+  endDate: string;
+};
+
 
 // Trip type for mock data for seeding and fallback
 export type MockTrip = {

@@ -1,12 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { SegmentCard } from '@/components/segment-card';
-import type { DayGroup, Segment, Trip } from '@/lib/types';
+import type { DayGroup, SerializedSegment, SerializedTrip } from '@/lib/types';
 import ItineraryLoading from '@/app/itinerary/loading';
 import { getLiveItineraryStatus } from '@/ai/flows/get-live-itinerary-status';
 
 interface ItineraryViewProps {
-  trip: Trip;
+  trip: SerializedTrip;
   initialItinerary: DayGroup[];
 }
 
@@ -20,10 +20,9 @@ export function ItineraryView({ trip, initialItinerary }: ItineraryViewProps) {
         const allSegments = initialItinerary.flatMap(day => day.segments);
         const allSegmentsForAI = allSegments.map(s => ({
             ...s,
-            // Convert timestamp to string for AI flow
             startTime: s.startTime,
             endTime: s.endTime,
-            date: s.date.toDate().toISOString(),
+            date: s.date, // Already a string
         }));
         
         // Ensure we don't send empty requests
@@ -35,12 +34,12 @@ export function ItineraryView({ trip, initialItinerary }: ItineraryViewProps) {
 
         const result = await getLiveItineraryStatus({ segments: allSegmentsForAI });
         
-        const updatedSegmentsById = new Map<string, Segment>();
+        const updatedSegmentsById = new Map<string, SerializedSegment>();
         result.segments.forEach(segment => {
           // Find original segment to preserve timestamp object
           const originalSegment = allSegments.find(s => s.id === segment.id);
           if (originalSegment) {
-            updatedSegmentsById.set(segment.id, { ...originalSegment, ...segment });
+            updatedSegmentsById.set(segment.id, { ...originalSegment, ...segment, date: originalSegment.date });
           }
         });
 

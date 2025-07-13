@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import type { DayGroup } from '@/lib/types';
+import type { DayGroup, SerializedTrip, SerializedSegment } from '@/lib/types';
 import ItineraryLoading from '../loading';
 import { getTrip, getTripSegments } from '@/lib/data';
 import { ItineraryView } from '@/components/itinerary-view';
@@ -39,11 +39,23 @@ export default async function ItineraryPage({
     notFound();
   }
 
+  // Serialize data for Client Component
+  const serializedTrip: SerializedTrip = {
+    ...trip,
+    startDate: trip.startDate.toDate().toISOString(),
+    endDate: trip.endDate.toDate().toISOString(),
+  };
+
+  const serializedSegments: SerializedSegment[] = segments.map(segment => ({
+    ...segment,
+    date: segment.date.toDate().toISOString(),
+  }));
+
+
   // Group segments by date
-  const dayGroups: DayGroup[] = segments.reduce((acc: DayGroup[], segment) => {
-    const segmentDate = segment.date.toDate();
-    const dateStr = segmentDate.toISOString().split('T')[0];
-    const dayName = segmentDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+  const dayGroups: DayGroup[] = serializedSegments.reduce((acc: DayGroup[], segment) => {
+    const dateStr = new Date(segment.date).toISOString().split('T')[0];
+    const dayName = new Date(segment.date).toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
 
     let dayGroup = acc.find(g => g.date === dateStr);
     if (!dayGroup) {
@@ -62,5 +74,5 @@ export default async function ItineraryPage({
   dayGroups.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
 
-  return <ItineraryView trip={trip} initialItinerary={dayGroups} />;
+  return <ItineraryView trip={serializedTrip} initialItinerary={dayGroups} />;
 }

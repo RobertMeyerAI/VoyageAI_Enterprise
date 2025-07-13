@@ -7,9 +7,9 @@ import * as icons from 'lucide-react';
 import { Timestamp } from 'firebase/firestore';
 import { tripsData as mockTripsData } from '@/lib/mock-data';
 
-function formatDateRange(startDate: Timestamp, endDate: Timestamp) {
-  const start = startDate.toDate();
-  const end = endDate.toDate();
+function formatDateRange(startDate: Date, endDate: Date) {
+  const start = startDate;
+  const end = endDate;
 
   const startMonth = start.toLocaleDateString('en-US', {
     month: 'short',
@@ -44,7 +44,7 @@ function TripCard({ trip }: { trip: Trip }) {
           </div>
           <div className="text-sm text-muted-foreground mt-1">
             <Calendar className="mr-1.5 h-4 w-4 inline-block" />
-            <span>{formatDateRange(trip.startDate, trip.endDate)}</span>
+            <span>{formatDateRange(trip.startDate.toDate(), trip.endDate.toDate())}</span>
           </div>
         </div>
       </Card>
