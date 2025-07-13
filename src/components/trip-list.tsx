@@ -405,5 +405,3 @@ export function TripList({ initialTrips }: { initialTrips: SerializedTrip[] }) {
         </div>
     );
 }
-
-    
