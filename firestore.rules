@@ -1,21 +1,18 @@
-
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow reading of trips and their segments by anyone.
-    // This is suitable for development but should be secured
-    // with authentication rules for production.
+    // Allow read access to trips and their segments for all users
+    match /trips/{tripId}/{document=**} {
+      allow read: if true;
+    }
     match /trips/{tripId} {
       allow read: if true;
-
-      match /segments/{segmentId} {
-        allow read: if true;
-      }
     }
 
-    // Disallow all other writes to the database for security.
-    match /{document=**} {
-      allow write: if false;
+    // Default deny for all other paths
+    match /{path=**} {
+      allow read, write: if false;
     }
   }
 }
