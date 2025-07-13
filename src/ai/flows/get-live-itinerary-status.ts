@@ -25,7 +25,7 @@ const SegmentSchemaForAI = z.object({
   endLocationShort: z.string(),
   date: z.string().describe("The date of the segment in ISO 8601 format."),
   duration: z.string().optional(),
-  details: z.record(z.string()).optional().describe("An object for additional details like Gate, Seat, Terminal, etc."),
+  details: z.any().optional().describe("An object for additional details like Gate, Seat, Terminal, etc."),
   media: z.array(z.object({ type: z.enum(['qr', 'pdf']), url: z.string() })).optional(),
 });
 
