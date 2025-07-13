@@ -77,6 +77,25 @@ export const NewSegmentSchema = z.object({
 });
 export type NewSegmentData = z.infer<typeof NewSegmentSchema>;
 
+// Type for the data extracted by the AI from an email.
+// This is separate because the AI provides dates and times as strings.
+export type ExtractedSegment = {
+    type: 'flight' | 'lodging' | 'train' | 'ferry' | 'bus' | 'activity' | 'car';
+    status: 'confirmed' | 'delayed' | 'cancelled';
+    title: string;
+    provider: string;
+    confirmationCode: string;
+    startTime: string;
+    endTime: string;
+    startLocation: string;
+    endLocation: string;
+    startLocationShort: string;
+    endLocationShort: string;
+    date: string; // YYYY-MM-DD format from AI
+    duration?: string;
+    details?: Record<string, string>;
+};
+
 
 // Trip type for mock data for seeding and fallback
 export type MockTrip = {
@@ -126,7 +145,7 @@ export type AiChatMessage = {
 };
 
 export type Alert = {
-  id: string;
+  id:string;
   severity: 'critical' | 'warning' | 'info';
   title: string;
   description: string;

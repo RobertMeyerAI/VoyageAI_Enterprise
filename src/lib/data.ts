@@ -1,11 +1,13 @@
 
 
+
 'use server';
 
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, getDoc, query, orderBy, addDoc, Timestamp, writeBatch, deleteDoc, updateDoc } from 'firebase/firestore';
-import type { Trip, Segment, NewTripData, NewSegmentData } from './types';
+import type { Trip, Segment, NewTripData, NewSegmentData, ExtractedSegment } from './types';
 import { revalidatePath } from 'next/cache';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function addTrip(tripData: NewTripData): Promise<string> {
   try {
@@ -83,6 +85,35 @@ export async function addSegment(tripId: string, segmentData: NewSegmentData): P
     } catch (error) {
         console.error('Error adding segment: ', error);
         throw new Error('Failed to create new segment.');
+    }
+}
+
+export async function addSegmentFromEmail(tripId: string, segmentData: ExtractedSegment): Promise<string> {
+    try {
+        const segmentsCol = collection(db, `trips/${tripId}/segments`);
+        
+        // Convert date string from AI to Firestore Timestamp
+        // The AI returns YYYY-MM-DD, which is safe to parse in UTC.
+        const segmentDate = new Date(segmentData.date + 'T00:00:00Z');
+        if (isNaN(segmentDate.getTime())) {
+            throw new Error(`Invalid date format from AI: ${segmentData.date}`);
+        }
+
+        const newSegment = {
+            ...segmentData,
+            date: Timestamp.fromDate(segmentDate),
+        }
+
+        const segmentId = uuidv4();
+        const segmentDocRef = doc(db, 'trips', tripId, 'segments', segmentId);
+        await setDoc(segmentDocRef, newSegment);
+
+        console.log(`Segment added from email with ID: ${segmentId} to trip ${tripId}`);
+        revalidatePath(`/itinerary/${tripId}`);
+        return segmentId;
+    } catch (error) {
+        console.error('Error adding segment from email: ', error);
+        throw new Error('Failed to save parsed segment.');
     }
 }
 
