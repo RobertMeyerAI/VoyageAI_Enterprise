@@ -108,7 +108,7 @@ export async function addSegmentFromEmail(tripId: string, segmentData: Extracted
         console.log(`Segment added from email with ID: ${segmentId} to trip ${tripId}`);
         revalidatePath(`/itinerary/${tripId}`);
         return segmentId;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error adding segment from email: ', error);
         throw new Error('Failed to save parsed segment.');
     }
@@ -160,7 +160,7 @@ export async function getTrip(tripId: string): Promise<Trip | null> {
 export async function getTripSegments(tripId: string): Promise<Segment[]> {
     try {
         const segmentsCol = collection(db, `trips/${tripId}/segments`);
-        const segmentsSnapshot = await getDocs(query(segmentsCol, orderBy('date', 'asc')));
+        const segmentsSnapshot = await getDocs(query(segmentsCol, orderBy('date', 'asc'), orderBy('startTime', 'asc')));
         if (segmentsSnapshot.empty) {
             console.log(`No segments found for trip ${tripId}.`);
             return [];

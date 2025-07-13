@@ -98,7 +98,7 @@ export function ItineraryView({ trip, initialItinerary }: ItineraryViewProps) {
 
           <div className="grid gap-4">
             {dayGroup.segments.map((segment) => (
-              <SegmentCard key={segment.id} segment={segment} />
+              <SegmentCard key={segment.id} segment={segment} tripId={trip.id} />
             ))}
           </div>
         </div>

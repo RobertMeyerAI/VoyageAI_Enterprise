@@ -17,11 +17,10 @@ import {
   FileText,
   Pencil,
   Trash2,
+  Loader2,
 } from 'lucide-react';
 import {
   Card,
-  CardContent,
-  CardHeader,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from './ui/button';
@@ -32,12 +31,24 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { cn } from '@/lib/utils';
+import { deleteSegment } from '@/lib/data';
+import { useToast } from '@/hooks/use-toast';
 
 const segmentIcons: Record<Segment['type'], React.ReactNode> = {
   flight: <Plane className="h-5 w-5" />,
@@ -70,8 +81,35 @@ const statusColors: Record<Segment['status'], string> = {
   cancelled: 'bg-red-500/20 text-red-300 border-red-500/30',
 };
 
-export function SegmentCard({ segment }: { segment: Segment }) {
+interface SegmentCardProps {
+    segment: Segment;
+    tripId: string;
+}
+
+export function SegmentCard({ segment, tripId }: SegmentCardProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+
+  const handleDelete = () => {
+    startTransition(async () => {
+        try {
+            await deleteSegment(tripId, segment.id);
+            toast({
+                title: 'Segment Deleted',
+                description: `"${segment.title}" has been successfully deleted.`,
+            });
+            setIsAlertOpen(false);
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Failed to delete the segment. Please try again.',
+            });
+        }
+    });
+  }
 
   return (
     <Collapsible
@@ -105,23 +143,50 @@ export function SegmentCard({ segment }: { segment: Segment }) {
                 </Badge>
               </CollapsibleTrigger>
               <div className="flex items-center gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      <span>Edit</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-500 focus:text-red-500">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span>Delete</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+                    <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        <span>Edit</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                            className="text-red-500 focus:text-red-500"
+                            onSelect={(e) => {
+                                e.preventDefault();
+                                setIsAlertOpen(true);
+                            }}
+                        >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        <span>Delete</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                    </DropdownMenu>
+                     <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the segment "{segment.title}".
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                            onClick={handleDelete}
+                            disabled={isPending}
+                            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                            >
+                            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Delete
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
                 <CollapsibleTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                         <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
@@ -170,7 +235,7 @@ export function SegmentCard({ segment }: { segment: Segment }) {
                   >
                       <span>{key}:</span>
                       <span className="font-mono font-medium text-foreground">
-                      {value}
+                      {String(value)}
                       </span>
                   </div>
                   ))}
